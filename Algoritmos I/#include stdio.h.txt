@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Estrutura para representar um herói
+typedef struct {
+    char nome[50];
+    int ataque;
+    int defesa;
+    int vida;
+    int turno;
+} Heroi;
+
+// Função para criar um herói
+Heroi criar_heroi(char *nome, int ataque, int defesa, int vida) {
+    Heroi novo_heroi;
+    strcpy(novo_heroi.nome, nome);
+    novo_heroi.ataque = ataque;
+    novo_heroi.defesa = defesa;
+    novo_heroi.vida = vida;
+    novo_heroi.turno = 0; // Inicializa o contador de turnos
+    return novo_heroi;
+}
+
+// Função para o combate entre heróis
+void batalha(Heroi *heroi1, Heroi *heroi2) {
+    while(heroi1->vida > 0 && heroi2->vida > 0) {
+        printf("Turno %d\n", ++(heroi1->turno)); // Incrementa e exibe o número do turno
+
+        // Turno do herói do jogador
+        printf("%s ataca %s!\n", heroi1->nome, heroi2->nome);
+        heroi2->vida -= heroi1->ataque; // Implemente cálculos de dano mais complexos aqui
+        if(heroi2->vida <= 0) break;
+
+        // Turno do inimigo
+        printf("%s ataca %s!\n", heroi2->nome, heroi1->nome);
+        heroi1->vida -= heroi2->ataque; // Implemente cálculos de dano mais complexos aqui
+    }
+
+    // Verifica o resultado da batalha
+    if(heroi1->vida > 0) {
+        printf("%s venceu a batalha!\n", heroi1->nome);
+    } else {
+        printf("%s venceu a batalha!\n", heroi2->nome);
+    }
+}
+
+int main() {
+    // Criação de heróis
+    Heroi heroi_jogador = criar_heroi("Guerreiro Valente", 10, 5, 100);
+    Heroi inimigo = criar_heroi("Monstro das Sombras", 8, 3, 80);
+
+    // Início da batalha
+    batalha(&heroi_jogador, &inimigo);
+
+    return 0;
+}

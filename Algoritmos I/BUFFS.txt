@@ -1,0 +1,59 @@
+BUFFS:
+Aumento de ATK: 0
+Aumento de ATK Superior: 1
+Aumento de DEF: 2
+Aumento de VEL: 3
+Aumento de CRIT: 4
+Aumento de DANO CRIT: 5
+Aumento de EFIC: 6
+Aumento de RESIST: 7
+Aumento de ESQV: 8
+Anti-Crit: 9
+Barreira: 10
+Imunidade: 11
+Cura Contínua: 12 
+Nulificador: 13 
+Imortal: 14 
+Invencível: 15 
+Reviver: 16 
+Contra-ataqie: 17
+Vigor: 18
+Raiva: 19
+Percepção: 20
+
+DEBUFFS:
+Diminuir ATK: 0
+Diminuir DEF: 1
+Diminuir VEL: 2
+Diminuir Acerto: 3
+Atordoamento: 4
+Sono: 5 
+Incurável: 6
+Bloqueio de Reforço: 7
+Silêncio: 8
+Provocação: 9
+Envenenamento: 10
+Queima: 11
+Sangramento: 12
+Bomba: 13
+Alvo: 14
+Contenção: 15
+Mácua: 16
+
+MODIFICADORES:
+Penetração: 0 
+Aumento do prontidão: 1
+Redução de Prontidão: 2 
+Aumento de Cooldown de Habilidade: 3 
+Redução de Cooldown de Habilidade: 4
+Aumento de Cooldown de Buff: 5
+Redução de Cooldown de Buff: 6
+Aumento de Cooldown de Debuff: 7 
+Redução de Cooldown de Debuff: 8 
+Remoção de Buff: 9 
+Remoção de Debuff: 10
+Extinção: 11 
+
+0 - sem vantagem ou desvantagem
+1 - vantagem elemental
+2 - desvantagem elemental

@@ -1,0 +1,31 @@
+-> Lista Simplesmente Encadeada: É a estrutura de dados mais básica. Cada nó contém um elemento e um ponteiro para o próximo nó na sequência:
+NULL <- |Primeiro Nó| -> |Segundo Nó| -> ... -> |Último Nó| -> NULL
+
+-> Lista Duplamente Encadeada: Semelhante à lista simplesmente encadeada, mas cada nó contém um elemento e dois ponteiros, um para o próximo nó e outro para o nó anterior na sequência. Isso permite percorrer a lista em ambas as direções:
+NULL <- |Primeiro Nó| <-> |Segundo Nó| <-> ... <-> |Último Nó| -> NULL
+
+-> Lista Circular: É uma variação da lista encadeada na qual o último nó aponta para o primeiro nó, formando um ciclo:
+|Primeiro Nó| <-> |Segundo Nó| <-> ... <-> |Último Nó| <-> |Primeiro Nó|
+
+-> Pilha (Stack): É uma estrutura de dados que segue o princípio LIFO (Last In, First Out). Os elementos são adicionados (push) e removidos (pop) do mesmo lado da lista (topo da pilha):
+NULL <- |Topo da Pilha (Primeiro Nó)| -> |Segundo Nó| -> ... -> |Base da Pilha (Último Nó)| -> NULL
+
+-> Fila (Queue): É uma estrutura de dados que segue o princípio FIFO (First In, First Out). Os elementos são adicionados (enqueue) em um lado da lista (final da fila) e removidos (dequeue) do outro lado (início da fila):
+|Início da Fila (Primeiro Nó)| -> |Segundo Nó| -> ... -> |Final da Fila (Último Nó)| -> NULL
+
+-> Deque (Double Ended Queue): É uma estrutura de dados que permite a inserção e remoção de elementos de ambos os lados da lista:
+|Início da Deque (Primeiro Nó)| <-> |Segundo Nó| <-> ... <-> |Final da Deque (Último Nó)|
+
+-> Fila de Prioridade: É uma estrutura de dados que cada elemento tem uma prioridade associada. Elementos com prioridades mais altas são dequeued antes dos elementos com prioridades mais baixas:
+|Nó de Maior Prioridade| -> |Nó de Segunda Maior Prioridade| -> ... -> |Nó de Menor Prioridade| -> NULL
+
+-> Árvore Binária: É uma estrutura de dados hierárquica na qual cada nó tem no máximo dois filhos, que são referidos como o filho esquerdo e o filho direito:
+            |Nó Raiz|
+           /        \
+  |Filho Esquerdo|  |Filho Direito|
+
+-> Grafo: É uma estrutura de dados que consiste em nós e arestas. Cada nó está conectado a outros nós através de arestas. Os grafos podem ser implementados como uma lista de adjacências usando listas encadeadas:
+|Vértice 1| -- |Vértice 2|
+   |             /
+   |            /
+|Vértice 3| -- |Vértice 4|

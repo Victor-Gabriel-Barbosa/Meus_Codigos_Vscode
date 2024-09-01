@@ -1,0 +1,1078 @@
+// Sistema de gerenciamento de funcionário(a)(s): Criar uma estrutura "funcionario" que armazena informações como nome, cargo, salário, data de contratação, etc. Depois, você deve implementar funções para adicionar novos funcionário(a)(s), listar todos os funcionário(a)(s), atualizar informações e excluir funcionário(a)(s).
+
+// Bibliotecas:
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdio_ext.h>
+#include <locale.h>
+#include <string.h>
+#include <ctype.h>
+
+// Variáveis locais:
+#define x 100
+#define qtd_funcionarios 5
+#define qtd_cargos 6
+
+// Início do programa
+int main(void) {
+  setlocale(LC_ALL, "Portuguese");
+  int i, j, aux_n, loop, cont_f = 0, fechar_p = 1, posicao[x], aux = 0, aux_cpf = 0, aux_ext = 0;
+  int diasNoMes[13] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  int arroba, ponto, antesPonto, depoisPonto, loop_ext;
+  char aux_c, aux_string[x], confirma, *pos, c, aux_string_ext[qtd_funcionarios][x];
+  char letras[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZáéíóúÁÉÍÓÚàèìòùÀÈÌÒÙâêîôûÂÊÎÔÛãõÃÕçÇ";
+  char acentos[] = "áéíóúÁÉÍÓÚàèìòùÀÈâêîôûÂÊÎÔãõÃçÇ";
+  char cargos[qtd_cargos][x] = {"Gerente", "Supervisor", "Operador", "Técnico", "Presidente Executivo", "Diretor"};
+  char menu[5][x] = {"CADAST", "ATUAL", "BUSC", "EXCL", "FECH"};
+  char sub_menu[3][x] = {"NOME", "CARGO", "SAL"};
+  float aux_float;
+  // Struct de funcionário(a)(s):
+  typedef struct funcionario {
+    char nome[x], cargo[x], endereco[x], telefone[x], email[x], cpf[x];
+    int dia, mes, ano;
+    float salario;
+  }funcionario;
+  funcionario func[qtd_funcionarios];
+
+  // Atribuindo valores padrão para a estrutura funcionario:
+  for (i = 0; i < qtd_funcionarios; i++) {
+    func[i].dia = 00;
+    func[i].mes = 00;
+    func[i].ano = 0000;
+  }
+
+  // Struct auxiliar de funcionário(a)(s): 
+  typedef struct funcionario_aux {
+    char nome[x], cargo[x], endereco[x], telefone[x], email[x], cpf[x];
+    int dia, mes, ano;
+    float salario;
+  }funcionario_aux;
+  funcionario_aux func_aux[qtd_funcionarios];
+
+  // Criando funcionário de teste:
+  strcpy(func[0].nome, "João");
+  strcpy(func[0].cargo, "Gerente");
+  strcpy(func[0].endereco, "Rua dos Anjos, n 32");
+  strcpy(func[0].telefone, "(38)998832804");
+  strcpy(func[0].email, "victorgabriel88@gmail.com");
+  strcpy(func[0].cpf, "12450715697");
+  func[0].dia = 01;
+  func[0].mes = 01;
+  func[0].ano = 2022;
+  func[0].salario = 3000;
+  cont_f++;
+  
+  printf("\033[36m>> Bem vindo ao sistema de gerenciamento \033[1mGNV\033[0m\033[36m de funcionário(a)(s)! <<\n");
+  // Loop principal (MENU):
+  do {
+    __fpurge(stdin);
+    for (j = 0; j < cont_f; j++) {
+      for (i = 0; func[j].nome[i] != '\0'; i++) { // Loop para vericar se o nome digitado é válido
+        if (strchr(acentos, func[j].nome[i]) == NULL 
+        && !isspace(func[j].nome[i])) {
+          aux_string_ext[j][i] = func[j].nome[i];
+        }
+      }
+    }
+    
+    do { // Loop para escolha de operação
+      __fpurge(stdin);
+      printf("\033[33m\nPressione \033[1mENTER\033[0m\033[33m para continuar...");
+      getchar();
+      __fpurge(stdin);
+      system("clear");
+      loop = 1;
+      aux_ext = 0;
+      aux_n = 0;
+      printf("\033[1m\n--------------MENU--------------\n\033[0m");
+      printf("\033[37m\nDigite o que você deseja fazer: \033[1m\033[34m\n1 - CADASTRAR FUNCIONÁRIO(A) \033[32m\n2 - ATUALIZAR INFORMAÇÕES");
+      printf("\033[33m\n3 - BUSCAR FUNCIONÁRIO(A)(S) \033[31m\n4 - EXCLUIR FUNCIONÁRIO(A)(S) \033[30m\n5 - FECHAR PROGRAMA");
+      printf("\033[1m\033[33m\n\n--------------------------------\033[0m");
+      printf("\033[37m\n\n>> OPÇÃO: ");
+      fgets(aux_string, x, stdin);
+      __fpurge(stdin);
+      
+        for(i = 0; i < strlen(aux_string); i++){ // Loop para converte as letras para maiúsculas
+          aux_string[i] = toupper(aux_string[i]); // Função para converter letras minúsculas em maiúsculas
+        }
+      
+        if ((pos = strchr(aux_string, '\n')) != NULL) // Substitui o \n por \0
+          *pos = '\0';
+        for (i = 0; i < strlen(aux_string); i++) { // Loop para verificar se o caracter é alfabético
+          if (isdigit(aux_string[i])) {
+            aux_n = 1; // Caso o caracter não seja alfabético, aux_n recebe 1
+          }
+        }
+          if (aux_n == 0) { // Caso seja uma palavra sem caracteres especiais ou números
+            for (i = 0; i < 5; i++)  {
+              if (strstr(aux_string, menu[i]) != NULL) { // Compara a string com os 5 menus
+                aux_ext = i + 1; // Armazena o valor da opção escolhida
+                loop = 0; // Encerra o loop
+              }
+            }
+          }
+            else {
+              aux_ext = atoi(aux_string); // Caso o caracter seja um número, o valor é convertido para inteiro
+              __fpurge(stdin);
+                if (aux_ext >= 1 && aux_ext <= 5) { // Caso o valor digitado esteja entre 1 e 5
+                  loop = 0; // Encerra o loop
+                }
+            }
+        if (loop == 1)
+          printf("\n>> OPÇÃO INVÁLIDA! <<\n");
+  } while (loop);
+        switch (aux_ext) { // Switch case para escolha de operação
+
+          // Cadastro de funcionário(a)(s):
+          case 1:
+            if (cont_f < qtd_funcionarios) { // Validação de quantidade de funcionário(a)(s)
+              printf("\033[34m\033[1m\n---------CADASTRO DE FUNCIONÁRIO(A)---------\n\033[0m");
+              printf("\033[34m\n---------------------------------------------------");
+              printf("\nFUNCIONÁRIO(A) %d", cont_f + 1);
+              printf("\n---------------------------------------------------\n");
+
+
+              do { // Loop para entrada e validação do nome do funionário
+                __fpurge(stdin);
+                aux = 1; // Variável auxiliar para verificação de entrada válida
+                loop = 1; // Variável auxiliar para verificação de loop
+                printf("\nDigite o nome do(a) funcionário(a): ");
+                fgets(func[cont_f].nome, x, stdin);
+                __fpurge(stdin);
+                if (!isupper(func[cont_f].nome[0])) {
+                  printf("\nO nome deve começar com uma letra maiúscula! Tente novamente...\n");
+                  aux = 0; // Atribuição de valor 0 para auxiliar
+                }
+
+                for (int i = 0; func[cont_f].nome[i] != '\0'; i++) {
+                  if (strchr(letras, func[cont_f].nome[i]) == NULL 
+                  && !isspace(func[cont_f].nome[i])) {
+                    aux = 2 ; // Atribuição de valor 2 para auxiliar
+                  }
+                }
+                
+                if (aux == 2) // Condição para verificação de auxiliar
+                  printf("\nO nome deve conter apenas letras ou espaços! Tente novamente...\n");
+                // Se passou por todas as verificações, o nome é válido
+                if (aux == 1)
+                  loop = 0; // Atribuição de valor 0 para parar o loop
+              } while (loop); // Fim do loop para entrada e validação do nome do funcionário(a)
+
+
+              do { // Loop para escolha de cargo
+                aux_n = 0; 
+                loop = 1; // Variável auxiliar de loop
+                printf("\nOs cargos disponíveis são: ");
+                  for (i = 0; i < qtd_cargos; i++) {
+                    printf("\n%d - %s", i + 1 , cargos[i]);
+                  }
+                printf("\n\nDigite o cargo do(a) funcionário(a): ");
+                fgets(func[cont_f].cargo, x, stdin);
+                __fpurge(stdin);
+                  if ((pos = strchr(func[cont_f].cargo, '\n')) != NULL) // Validação de entrada
+                    *pos = '\0';
+                    for (i = 0; i < qtd_cargos; i++) {
+                      if (strcasecmp(func[cont_f].cargo, cargos[i]) == 0) { // Comparação de cargos
+                        loop = 0; // Condição de loop
+                      }
+                    }
+                    if (loop == 1)
+                      aux_n = atoi(func[cont_f].cargo); // Atribuição de valor 0 para auxiliar
+                      if (aux_n <= 0 || aux_n > qtd_cargos) // Condição de entrada inválida
+                        printf("\nCARGO INVÁLIDO! TENTE NOVAMENTE...\n");
+                          else {
+                            strcpy(func[cont_f].cargo, cargos[aux_n - 1]); // Atribuição do cargo escolh
+                            loop = 0; // Condição de loop
+                          }
+              } while (loop); // Fim do loop para escolha de cargo
+
+
+              do { // Loop para escolha de salário do(a) funcionário(a)
+                loop = 1;
+                printf("\nDigite o salário do(a) funcionário(a) \n(Use '.' para casas decimais): R$");
+                if (scanf("%f%c", &func[cont_f].salario, &aux_c) != 2 || aux_c != '\n' || func[cont_f].salario < 0) { // Validação de entrada
+                  __fpurge(stdin);
+                  printf("\nSALÁRIO INVÁLIDO! TENTE NOVAMENTE...\n");
+                }
+                  else
+                    loop = 0;
+              } while (loop);
+
+
+                    do { // Loop para escolha de data de contratação do funcionário(a)
+                      __fpurge(stdin);
+                      loop = 1; // Reseta o loop
+                      printf("\nDigite a data de contratação do(a) funcionário(a) \n(dd/mm/aaaa): ");
+                      if (scanf("%d/%d/%d", &func[cont_f].dia, &func[cont_f].mes, &func[cont_f].ano) != 3 
+                      || func[cont_f].dia < 1 || func[cont_f].mes < 1 || func[cont_f].mes > 12 
+                      || func[cont_f].ano < 1900 || func[cont_f].ano > 2023) { // Validação de entrada
+                            printf("\nDATA INVÁLIDA! TENTE NOVAMENTE...\n");
+                      } 
+                        else {
+                          if ((func[cont_f].ano % 4 == 0 && func[cont_f].ano % 100 != 0) || (func[cont_f].ano % 400 == 0)) // Validação de ano bissexto
+                            diasNoMes[2] = 29; // Fevereiro em ano bissexto
+                            else // Validação de ano não bissexto
+                                diasNoMes[2] = 28; // Fevereiro em ano não bissexto
+                            if (func[cont_f].dia > diasNoMes[func[cont_f].mes])
+                                printf("\nDATA INVÁLIDA ESPERTINHO(A)! ACHOU QUE IRIA BURLAR O SISTEMA? TENTE O SEU PIOR...\n\n");
+                              else // Data válida
+                                loop = 0;
+                        }
+                    } while (loop); // Fim do loop para escolha de data de contratação do funcionário(a)
+
+              __fpurge(stdin);
+              printf("\nDigite o endereço do(a) funcionário(a): ");
+              fgets(func[cont_f].endereco, x, stdin);
+              __fpurge(stdin);
+
+
+              do { // Loop para escolha do telefone do funcionário(a)
+                aux_n = 0; // Reseta o auxiliar
+                aux = 0; // Reseta o valor da variável auxiliar
+                loop = 1; // Reseta a variável de loop
+                printf("\nDigite o telefone do(a) funcionário(a) \n(Ps.: O telefone deve conter ao menos 10 digitos || DDD deve vir entre colchetes: '()' || Não use espaços): \n");
+                fgets(func[cont_f].telefone, x, stdin);
+                __fpurge(stdin);
+                  for(int i = 0; i < strlen(func[cont_f].telefone); i++) { // Loop para verificar o telefone é válido
+                      if(isdigit(func[cont_f].telefone[i])) {
+                        aux++; // Incrementa o valor da variável auxiliar
+                      }
+                        else if (i == 0 && func[cont_f].telefone[0] == '(' 
+                        || i == 3 && func[cont_f].telefone[3] == ')') {
+                          aux_n++; // Incrementa o valor da variável auxiliar
+                        }
+                          else if (func[cont_f].telefone[i] != '\n') {
+                            aux = 0; // Zera o valor da variável auxiliar caso o caracter n seja válido
+                          }
+                  }
+                  if (aux < 10 || aux > 11 || aux_n != 2) // Validação de entrada
+                    printf("\nTELEFONE INVÁLIDO! TENTE NOVAMENTE...\n");
+                    else
+                      loop = 0;
+              } while (loop); // Fim do loop para escolha do telefone do(a) funcionário(a)
+
+
+              do { // Loop para escolha e verificação de validade do email do funcionário(a)
+                loop = 1; // Reseta a variável de loop
+                printf("\nDigite o email do(a) funcionário(a): ");
+                fgets(func[cont_f].email, x, stdin);
+                __fpurge(stdin);
+                // Reseta variáveis auxiliares de validação:
+                arroba = 0;
+                ponto = 0;
+                antesPonto = 0;
+                depoisPonto = 0;
+                for (i = 0; i < strlen(func[cont_f].email); i++) { // Loop para verificar se o email é válido
+                  c = func[cont_f].email[i]; // Recebe o caractere do email
+                  if (c == '@') { // Verifica se o caractere é '@'
+                    if (arroba) // Verifica se o caractere anterior é '@'
+                      i = strlen(func[cont_f].email); // Não pode ter uma segunda '@'
+                    arroba = 1; // Caso o caractere seja '@', marca a variável como 1
+                    if (i < 3)
+                      i = strlen(func[cont_f].email); // Se '@' vier antes de 3 caracteres, erro
+                      antesPonto = 0; // reinicia a contagem de caracteres antes do ponto
+                      depoisPonto = 0; // reinicia a contagem de caracteres depois do ponto
+                  }
+                  else if (arroba) { // Se já encontrou @
+                    if (ponto) { // Se já encontrou '.' depois de '@'
+                      depoisPonto++; // Conta quantos caracteres vierem depois do ponto
+                    }
+                    else if (c == '.') { // Se encontrou '.' antes de '@'
+                      ponto = 1; // Indica que encontrou o ponto
+                      if (antesPonto < 3) { // Se '.' vier antes de 3 caracteres, erro
+                        i = strlen(func[cont_f].email);   // Não pode ter um segundo '.'
+                      }
+                    }
+                    else {
+                      antesPonto++;
+                    }
+                  }
+                } 
+
+                if (i == strlen(func[cont_f].email) && depoisPonto > 1) // Se o email tiver o tamanho correto e o ponto
+                  loop = 0; // Encerra o loop
+                else // Se o email não tiver o tamanho correto ou não tiver o ponto
+                  printf("\nEmail inválido! Tente novamente...\n");
+              } while (loop); // Fim do loop para escolha de email do(a) funcionário(a)
+
+              do { // Loop para escolha do CPF do funcionário(a)
+                loop = 1;
+                aux_cpf = 0;
+                printf("\nDigite o CPF do(a) funcionário(a) \n(Ps.: Não use pontuação || CPF deve conter 11 números || Não use espaços): \n");
+                fgets(func[cont_f].cpf, x, stdin);
+                __fpurge(stdin);
+                  for (i = 0; i < strlen(func[cont_f].cpf); i++)
+                    if (isdigit(func[cont_f].cpf[i]))
+                      aux_cpf++; 
+                    if (aux_cpf != 11)
+                      printf("\nCPF INVÁLIDO! TENTE NOVAMENTE...\n\n");
+                      else
+                        loop = 0;
+              } while (loop); // Fim do loop para escolha de CPF do(a) funcionário(a)
+
+              printf("\n---------------------------------------------------\n");
+              printf("\nFuncionário(a) cadastrado(a) com sucesso!\n");
+              cont_f++; // Incremento de contador de funcionário(a)(s)
+            }
+            break;
+
+            // Atualização de informações de funcionário(a):
+            case 2:
+              if (cont_f > 0) {
+                do { 
+                  loop_ext = 1;
+                  do { // Loop para escolha de forma de busca 
+                    __fpurge(stdin);
+                    // Zerando variáveis auxiliares:
+                    aux = 0; 
+                    loop = 1;
+                    aux_ext = 0; 
+                    aux_n = 0;
+                    printf("\033[32m\033[1m\n---------ATUALIZAR INFORMAÇÕES---------\n\033[0m");
+                    printf("\033[32m\nDigite a forma de busca para atualizar \no(a)(s) funcionário(a)(s): ");
+                    printf("\n1 - PELO NOME \n2 - PELO CARGO \n3 - PELO SALÁRIO \n4 - VOLTAR AO MENU");
+                    printf("\n\n---------------------------------------\n");
+                    printf("\n>> OPÇÃO: ");
+                    fgets(aux_string, x, stdin);
+                    __fpurge(stdin);
+
+                      for(i = 0; i < strlen(aux_string); i++){ // Loop para converte as letras para maiúsculas
+                        aux_string[i] = toupper(aux_string[i]);
+                      }
+
+                      if ((pos = strchr(aux_string, '\n')) != NULL) // Substitui o \n por \0
+                        *pos = '\0';
+                      for (i = 0; i < strlen(aux_string); i++) {
+                        if (isdigit(aux_string[i])) {
+                          aux_n = 1;
+                        }
+                      }
+                        if (aux_n == 0) {
+                          for (i = 0; i < 3; i++)  {
+                            if (strstr(aux_string, sub_menu[i]) != NULL) {
+                              aux_ext = i + 1;
+                              loop = 0;
+                            }
+                          }
+                        }
+                          else {
+                            aux_ext = atoi(aux_string);
+                            __fpurge(stdin);
+                              if (aux_ext >= 1 && aux_ext <= 4) {
+                                loop = 0;
+                              }
+                          }
+                      if (loop == 1)
+                        printf("\n>> OPÇÃO INVÁLIDA! <<\n");
+                } while (loop); // Fim do loop para escolha de forma de busca
+
+                if (aux_ext == 1) { // Busca por nome
+                  __fpurge(stdin);
+                  printf("\n---------ATUALIZAR INFORMAÇÕES PELO NOME---------\n");
+                  printf("\nDigite o nome do(a) funcionário(a): ");
+                  fgets(func_aux[0].nome, x, stdin);
+                  __fpurge(stdin);
+                    if ((pos = strchr(func_aux[0].nome, '\n')) != NULL) // Validação de entrada
+                      *pos = '\0';
+                        
+                    for (i = 0; func_aux[0].nome[i] != '\0'; i++) { // Loop para vericar há acentos no nome digitado
+                      if (strchr(acentos, func_aux[0].nome[i]) == NULL 
+                      && !isspace(func_aux[0].nome[i])) { // Validação de entrada
+                        aux_string[i] = func_aux[0].nome[i]; // Armazena as letras sem acento
+                      }
+                    }
+                        
+                  for (i = 0; i < cont_f; i++) // Loop para busca de funcionário(a)
+                    if (strcasecmp(aux_string_ext[i], aux_string) == 0) { // Comparação de strings
+                      aux++; // Incremento de variável auxiliar
+                      posicao[aux] = i; // Armazena a posição do(a) funcionário(a)
+                    }
+                    if (aux == 0) { // Caso não encontre o funcionário(a)
+                      printf("\n>> FUNCIONÁRIO(A) NÃO ENCONTRADO(A)! <<\n");
+                    }
+                      else
+                        loop_ext = 0;
+                }
+
+                    if (aux_ext == 2) {
+                      __fpurge(stdin);
+                      printf("\n---------ATUALIZAR INFORMAÇÕES PELO CARGO---------\n");
+                      aux_n = 0; 
+                      loop_ext = 1; // Variável auxiliar de loop
+                      printf("\nOs cargos disponíveis são: ");
+                        for (i = 0; i < qtd_cargos; i++) 
+                          printf("\n%d - %s", i + 1 , cargos[i]);
+                      printf("\n>> Digite o cargo do(a) funcionário(a) buscado: ");
+                      fgets(aux_string, x, stdin);
+                      __fpurge(stdin);
+                        if ((pos = strchr(aux_string, '\n')) != NULL) // Validação de entrada
+                          *pos = '\0';
+                        
+                          for (i = 0; i < qtd_cargos; i++) 
+                            if (strcasecmp(aux_string, func[i].cargo) == 0) {
+                                aux++; // Incremento de variável auxiliar
+                                posicao[aux] = i; // Armazena a posição do funcionário(a)
+                                loop_ext = 0; // Condição de loop
+                            }
+                          if (loop_ext == 1 && atoi(aux_string) > 0 
+                          && atoi(aux_string) < qtd_cargos) {
+                            aux_n = atoi(aux_string); // Atribuição de valor 0 para auxiliar
+                            strcpy(aux_string, cargos[aux_n - 1]);
+                            for (i = 0; i < qtd_cargos; i++) 
+                              if (strcasecmp(aux_string, func[i].cargo) == 0) {
+                                  aux++; // Incremento de variável auxiliar
+                                  posicao[aux] = i; // Armazena a posição do funcionário(a)
+                                  loop_ext = 0; // Condição de loop
+                              }
+                          }
+                          if (loop_ext == 1) { // Caso não encontre o funcionário(a)
+                            printf("\n>> FUNCIONÁRIO(A) NÃO ENCONTRADO(A)! <<\n");
+                          }
+                            else
+                              loop_ext = 0;
+                    }
+
+                      if (aux_ext == 3) {
+                        __fpurge(stdin);
+                        printf("\n---------ATUALIZAR INFORMAÇÕES PELO SALÁRIO---------\n");
+                        printf("Os salários disponíveis são: ");
+                          for (i = 0; i < cont_f; i++) // Loop para busca de funcionário(a)
+                            printf(">> %.2f << ", func[i].salario);  
+                        printf("\nDigite o salário do(a) funcionário(a) buscado: R$");
+                        scanf("%f", &aux_float);
+                        __fpurge(stdin);
+                        for (i = 0; i < cont_f; i++) // Busca o salário do funcionário(a)
+                          if (func[i].salario == aux_float) { // Caso encontre o funcionário(a)
+                            aux++; // Incremento do contador
+                            posicao[aux] = i; // Armazena a posição do funcionário(a)
+                          }
+                            if (aux == 0) { // Caso não encontre o funcionário(a)
+                              printf("\n>> FUNCIONÁRIO(A) NÃO ENCONTRADO(A)! <<\n");
+                            }
+                              else
+                                loop_ext = 0;
+                      }
+
+                        if (aux_ext == 4) { // Volta ao menu
+                          __fpurge(stdin);
+                          printf("\nVoltando ao menu principal...\n");
+                          loop_ext = 0;
+                        }
+                  } while (loop_ext); // Fim do loop para escolha de busca para atualização
+                        
+                        // Atualização de dados:
+                        while (aux > 0) {
+                          printf("\n---------------------------------------------------");
+                          printf("\nFUNCIONÁRIO(A) %d:", posicao[aux] + 1);
+                          printf("\n---------------------------------------------------");
+                            do { // Loop para entrada e validação do nome do(a) funionário(a)
+                              __fpurge(stdin);
+                              printf("\nO atual nome do(a) funcionário(a) é: %s", func[posicao[aux]].nome);
+                              aux_n = 1; // Variável auxiliar para verificação de entrada válida
+                              loop = 1; // Variável auxiliar para verificação de loop
+                              printf("\n>> Digite o novo nome do(a) funcionário(a): ");
+                              fgets(func_aux[posicao[aux]].nome, x, stdin);
+                              __fpurge(stdin);
+                                if (!isupper(func_aux[posicao[aux]].nome[0])) {
+                                  printf("\nO nome deve começar com uma letra maiúscula! Tente novamente...\n");
+                                  aux_n = 0; // Atribuição de valor 0 para auxiliar
+                              // Verifica se os caracteres restantes são letras ou espaços
+                                }
+                        
+                                for (int i = 0; func_aux[cont_f].nome[i] != '\0'; i++) {
+                                  if (strchr(letras, func_aux[cont_f].nome[i]) == NULL 
+                                  && !isspace(func_aux[cont_f].nome[i])) {
+                                    aux = 2 ; // Atribuição de valor 2 para auxiliar
+                                  }
+                                }
+                              if (aux_n == 2) // Condição para verificação de auxiliar
+                                printf("\nO nome deve conter apenas letras ou espaços! Tente novamente...\n");
+                              // Se passou por todas as verificações, o nome é válido
+                              if (aux_n == 1)
+                                loop = 0; // Atribuição de valor 0 para parar o loop
+                            } while (loop); // Fim do loop para entrada e validação do nome do(a) funcionário(a)
+
+
+                            do { // Loop para escolha de cargo
+                              __fpurge(stdin);
+                              printf("\nO atual cargo do(a) funcionário(a) é: %s", func[posicao[aux]].cargo);
+                              aux_n = 0; 
+                              loop = 1; // Variável auxiliar de loop
+                              printf("\nOs cargos disponíveis são: ");
+                                for (i = 0; i < qtd_cargos; i++) {
+                                  printf("\n%d - %s", i + 1 , cargos[i]);
+                                }
+                              printf("\n>> Digite o novo cargo do(a) funcionário(a): ");
+                              fgets(func_aux[posicao[aux]].cargo, x, stdin);
+                              __fpurge(stdin);
+                                if ((pos = strchr(func_aux[posicao[aux]].cargo, '\n')) != NULL) // Validação de entrada
+                                  *pos = '\0';
+                                  for (i = 0; i < qtd_cargos; i++) {
+                                    if (strcasecmp(func_aux[posicao[aux]].cargo, cargos[i]) == 0) { // Comparação de cargos
+                                      loop = 0; // Condição de loop
+                                    }
+                                  }
+                                  if (loop == 1) {
+                                    aux_n = atoi(func_aux[posicao[aux]].cargo); // Atribuição de valor 0 para auxiliar
+                                    if (aux_n <= 0 || aux_n > qtd_cargos) // Condição de entrada inválida
+                                      printf("\nCARGO INVÁLIDO! TENTE NOVAMENTE...\n");
+                                        else {
+                                          strcpy(func_aux[posicao[aux]].cargo, cargos[aux_n - 1]); // Atribuição do cargo escolh
+                                          loop = 0; // Condição de loop
+                                        }
+                                  }
+                            } while (loop); // Fim do loop para escolha de cargo
+
+
+                            do { // Loop para escolha de salário do(a) funcionário(a)
+                              __fpurge(stdin);
+                              loop = 1;
+                              printf("\nO atual salário do(a) funcionário(a) é: R$%.2f", func[posicao[aux]].salario);
+                              printf("\n>> Digite o novo salário do(a) funcionário(a): R$");
+                              if (scanf("%f%c", &func_aux[posicao[aux]].salario, &aux_c) != 2 || aux_c != '\n' || func_aux[posicao[aux]].salario < 0) { // Validação de entrada
+                                __fpurge(stdin);
+                                printf("\nSALÁRIO INVÁLIDO! TENTE NOVAMENTE...\n");
+                              }
+                                else
+                                  loop = 0;
+                            } while (loop); // Fim do loop para escolha de salário do(a) funcionário(a)
+
+
+                            do { // Loop para escolha de data de contratação do(a) funcionário(a)
+                              __fpurge(stdin);
+                              loop = 1; // Reseta o loop
+                              printf("\nA atual data de contratação do(a) funcionário(a) é: %02d/%02d/%04d", func[posicao[aux]].dia, func[posicao[aux]].mes, func[posicao[aux]].ano);
+                              printf("\n>> Digite a nova data de contratação do(a) funcionário(a) \n(dd/mm/aaaa): ");
+                              if (scanf("%d/%d/%d", &func_aux[posicao[aux]].dia,
+                              &func_aux[posicao[aux]].mes, &func_aux[posicao[aux]].ano) != 3 
+                              || func_aux[posicao[aux]].dia < 1 || func_aux[posicao[aux]].mes < 1 
+                              || func_aux[posicao[aux]].mes > 12 || func_aux[posicao[aux]].ano < 1900 || func_aux[posicao[aux]].ano > 2023) { // Validação de entrada
+                                    printf("\nDATA INVÁLIDA! TENTE NOVAMENTE...\n");
+                              } 
+                                else {
+                                  if ((func_aux[posicao[aux]].ano % 4 == 0 && func_aux[posicao[aux]].ano % 100 != 0) || (func_aux[posicao[aux]].ano % 400 == 0)) // Validação de ano bissexto
+                                    diasNoMes[2] = 29; // Fevereiro em ano bissexto
+                                    else // Validação de ano não bissexto
+                                        diasNoMes[2] = 28; // Fevereiro em ano não bissexto
+                                    if (func_aux[posicao[aux]].dia > diasNoMes[func_aux[posicao[aux]].mes])
+                                        printf("\nDATA INVÁLIDA ESPERTINHO(A)! ACHOU QUE IRIA BURLAR O SISTEMA? TENTE O SEU PIOR...\n\n");
+                                      else // Data válida
+                                        loop = 0;
+                                }
+                            } while (loop); // Fim do loop para escolha de data de contratação do(a) funcionário(a)
+
+                          __fpurge(stdin);
+                          printf("\nO atual endereço do(a) funcionário(a) é: %s", func[posicao[aux]].endereco);
+                          printf("\n>> Digite o novo endereço do(a) funcionário(a): ");
+                          fgets(func_aux[posicao[aux]].endereco, x, stdin);
+                          __fpurge(stdin);
+
+                            do { // Loop para escolha do telefone do funcionário(a)
+                              __fpurge(stdin);
+                              aux_n = 0; // Reseta o auxiliar
+                              aux_ext = 0; // Reseta o valor da variável auxiliar
+                              loop = 1; // Reseta a variável de loop
+                              printf("\n\nO atual telefone do(a) funcionário(a) é: %s", func[posicao[aux]].telefone);
+                              printf("\n>> Digite o novo telefone do(a) funcionário(a) \n(Ps.: O telefone deve conter ao menos 10 digitos || DDD deve vir entre colchetes: '()' || Não use espaços): \n");
+                              fgets(func_aux[posicao[aux]].telefone, x, stdin);
+                              __fpurge(stdin);
+                                for (int i = 0; i < strlen(func_aux[posicao[aux]].telefone); i++) { // Loop para verificar o telefone é válido
+                                    if (isdigit(func_aux[posicao[aux]].telefone[i])) {
+                                      aux_ext++; // Incrementa o valor da variável auxiliar
+                                    }
+                                      else if (i == 0 && func_aux[posicao[aux]].telefone[0] == '(' 
+                                      || i == 3 && func_aux[posicao[aux]].telefone[3] == ')') {
+                                        aux_n++; // Incrementa o valor da variável auxiliar
+                                      }
+                                        else if (func_aux[posicao[aux]].telefone[i] != '\n') {
+                                          aux_ext = 0; // Zera o valor da variável auxiliar caso o caracter n seja válido
+                                        }
+                                }
+                                  if (aux_ext < 10 || aux_ext > 11 || aux_n != 2) { // Validação de entrada
+                                    printf("\nTELEFONE INVÁLIDO! TENTE NOVAMENTE...\n");
+                                  }
+                                    else
+                                      loop = 0;
+                            } while (loop); // Fim do loop para escolha do telefone do(a) funcionário(a)
+
+
+                          do { // Loop para escolha e verificação de validade do email do(a) funcionário(a)
+                            __fpurge(stdin);
+                            loop = 1; // Reseta a variável de loop
+                            printf("\n\nO atual email do(a) funcionário(a) é: %s", func[posicao[aux]].email);
+                            printf("\n>> Digite o novo email do(a) funcionário(a): ");
+                            fgets(func_aux[posicao[aux]].email, x, stdin);
+                            __fpurge(stdin);
+                            // Reseta variáveis auxiliares de validação:
+                            arroba = 0;
+                            ponto = 0;
+                            antesPonto = 0;
+                            depoisPonto = 0;
+                            for (i = 0; i < strlen(func_aux[posicao[aux]].email); i++) { // Loop para verificar se o email é válido
+                              c = func_aux[posicao[aux]].email[i]; // Recebe o caractere do email
+                              if (c == '@') { // Verifica se o caractere é '@'
+                                if (arroba) // Verifica se o caractere anterior é '@'
+                                  i = strlen(func_aux[posicao[aux]].email); // Não pode ter uma segunda '@'
+                                arroba = 1; // Caso o caractere seja '@', marca a variável como 1
+                                if (i < 3)
+                                  i = strlen(func_aux[posicao[aux]].email); // Se '@' vier antes de 3 caracteres, erro
+                                  antesPonto = 0; // reinicia a contagem de caracteres antes do ponto
+                                  depoisPonto = 0; // reinicia a contagem de caracteres depois do ponto
+                              }
+                              else if (arroba) { // Se já encontrou @
+                                if (ponto) { // Se já encontrou '.' depois de '@'
+                                  depoisPonto++; // Conta quantos caracteres vierem depois do ponto
+                                }
+                                else if (c == '.') { // Se encontrou '.' antes de '@'
+                                  ponto = 1; // Indica que encontrou o ponto
+                                  if (antesPonto < 3) { // Se '.' vier antes de 3 caracteres, erro
+                                    i = strlen(func_aux[posicao[aux]].email);   // Não pode ter um segundo '.'
+                                  }
+                                }
+                                else {
+                                  antesPonto++;
+                                }
+                              }
+                            } 
+
+                            if (i == strlen(func_aux[posicao[aux]].email) && depoisPonto > 1) // Se o email tiver o tamanho correto e o ponto
+                              loop = 0; // Encerra o loop
+                            else // Se o email não tiver o tamanho correto ou não tiver o ponto
+                              printf("\nEmail inválido! Tente novamente...\n");
+                          } while (loop); // Fim do loop para escolha de email do(a) funcionário(a)
+
+
+                          do { // Loop para escolha do CPF do funcionário(a)
+                            __fpurge(stdin);
+                            loop = 1;
+                            aux_cpf = 0;
+                            printf("\n\nO atual CPF do(a) funcionário(a) é: %s", func[posicao[aux]].cpf);
+                            printf("\n>> Digite o novo CPF do(a) funcionário(a) \n(Ps.: Não use pontuação || CPF deve conter 11 números || Não use espaços): \n");
+                            fgets(func_aux[posicao[aux]].cpf, x, stdin);
+                            __fpurge(stdin);
+                              for (i = 0; i < strlen(func_aux[posicao[aux]].cpf); i++)
+                                if (isdigit(func_aux[posicao[aux]].cpf[i]))
+                                  aux_cpf++; 
+                                if (aux_cpf != 11)
+                                  printf("\nCPF INVÁLIDO! TENTE NOVAMENTE...");
+                                  else
+                                    loop = 0;
+                          } while (loop); // Fim do loop para escolha de CPF do(a) funcionário(a)
+
+                          printf("\n-----------------------------------------\n");
+                          printf("\nTEM CERTEZA QUE DESEJA ATUALIZAR AS INFORMAÇÕES DO FUNCIONÁRIO(A) %d? (S/N) \n\n>> OPÇÃO: ", posicao[aux] + 1);
+                          scanf("%c", &confirma);
+                          __fpurge(stdin);
+                            if (confirma == 'S' || confirma == 's') { // Confirmação para atualização de dados
+                              strcpy(func[posicao[aux]].nome, func_aux[posicao[aux]].nome);
+                              strcpy(func[posicao[aux]].cargo, func_aux[posicao[aux]].cargo);
+                              func[posicao[aux]].salario = func_aux[posicao[aux]].salario;
+                              func[posicao[aux]].dia = func_aux[posicao[aux]].dia;
+                              func[posicao[aux]].mes = func_aux[posicao[aux]].mes;
+                              func[posicao[aux]].ano = func_aux[posicao[aux]].ano;
+                              strcpy(func[posicao[aux]].endereco, func_aux[posicao[aux]].endereco);
+                              strcpy(func[posicao[aux]].telefone, func_aux[posicao[aux]].telefone);
+                              strcpy(func[posicao[aux]].email, func_aux[posicao[aux]].email);
+                              strcpy(func[posicao[aux]].cpf, func_aux[posicao[aux]].cpf);
+                              printf("\nATUALIZAÇÃO REALIZADA COM SUCESSO!\n");
+                          }
+                            else if (confirma == 'N' || confirma == 'n') { // Cancelamento da atualização de dados
+                              printf("\nATUALIZAÇÃO CANCELADA!\n");
+                              break;
+                            }
+                              else { // Opção inválida
+                                printf("\nOPÇÃO INVÁLIDA!\n");
+                                break;
+                              }
+                          aux--; // Decremento do contador
+                        }
+                break;
+              }
+
+              // Busca de funcionário(a)(s):
+              case 3:
+                if (cont_f > 0) { // Verificação se existe funcionário(a) cadastrado
+                  do { 
+                    loop_ext = 0; 
+                    do { // Loop para verificar se o usuário digitou corretamente
+                      // Resetando variáveis auxiliares:
+                      loop = 1; 
+                      aux_n = 0;
+                      aux = 0;
+                      printf("\033[33m\033[1m\n---------BUSCAR FUNCIONÁRIO(A)(S)---------\n\033[0m");
+                      printf("\033[33m\nDigite a forma usada para buscar o(s) funcionário(a)(s): ");
+                      printf("\n1 - PELO NOME \n2 - PELO CARGO \n3 - PELO SALÁRIO \n4 - MOSTRAR TUDO \n5 - VOLTAR AO MENU");
+                      printf("\n\n------------------------------------------\n");
+                      printf("\n\n>> OPÇÃO: ");
+                        fgets(aux_string, x, stdin);
+                        __fpurge(stdin);
+
+                          for(i = 0; i < strlen(aux_string); i++){ // Loop para converte as letras para maiúsculas
+                            aux_string[i] = toupper(aux_string[i]);
+                          }
+
+                          if ((pos = strchr(aux_string, '\n')) != NULL) // Substitui o \n por \0
+                            *pos = '\0';
+                          for (i = 0; i < strlen(aux_string); i++) {
+                            if (isdigit(aux_string[i])) {
+                              aux_n = 1;
+                            }
+                          }
+                            if (aux_n == 0) {
+                              for (i = 0; i < 3; i++)  {
+                                if (strstr(aux_string, sub_menu[i]) != NULL) {
+                                  aux_ext = i + 1;
+                                  loop = 0;
+                                }
+                              }
+                            }
+                              else {
+                                aux_ext = atoi(aux_string);
+                                __fpurge(stdin);
+                                  if (aux_ext >= 1 && aux_ext <= 5) {
+                                    loop = 0;
+                                  }
+                              }
+                          if (loop == 1)
+                            printf("\n>> OPÇÃO INVÁLIDA! <<\n");
+                    } while (loop);
+  
+                    if (aux_ext == 1) {
+                      __fpurge(stdin);
+                      printf("\n---------BUSCAR INFORMAÇÕES PELO NOME---------\n");
+                      printf("\nDigite o nome do(a) funcionário(a): ");
+                      fgets(func_aux[0].nome, x, stdin);
+                      __fpurge(stdin);
+                        if ((pos = strchr(func_aux[0].nome, '\n')) != NULL) // Validação de entrada
+                          *pos = '\0';
+
+                        for (i = 0; func_aux[0].nome[i] != '\0'; i++) { // Loop para vericar há acentos no nome digitado
+                          if (strchr(acentos, func_aux[0].nome[i]) == NULL 
+                          && !isspace(func_aux[0].nome[i])) { // Validação de entrada
+                            aux_string[i] = func_aux[0].nome[i]; // Armazena as letras sem acento
+                          }
+                        }
+                        
+                      for (i = 0; i < cont_f; i++) { // Loop para buscar funcionário(a) pelo nome
+                        if (strcasecmp(aux_string_ext[i], aux_string) == 0) { // Comparação de strings
+                        aux++; // Incremento do contador
+                        posicao[aux] = i; // Armazena a posição do funcionário(a) encontrado
+                        }
+                      }
+                          if (aux == 0) { // Caso não encontre o funcionário(a)
+                            printf("\n>> FUNCIONÁRIO(A) NÃO ENCONTRADO(A)! <<\n");
+                            loop_ext = 1;
+                          }
+                    }
+  
+                        if (aux_ext == 2) { // Busca pelo cargo
+                          __fpurge(stdin);
+                          printf("\n---------BUSCAR INFORMAÇÕES PELO CARGO---------\n");
+                          aux_n = 0; 
+                          loop = 1; // Variável auxiliar de loop
+                          printf("\nOs cargos disponíveis são: ");
+                            for (i = 0; i < qtd_cargos; i++) 
+                              printf("\n%d - %s", i + 1 , cargos[i]);
+                          printf("\n>> Digite o cargo do(a) funcionário(a) buscado: ");
+                          fgets(aux_string, x, stdin);
+                          __fpurge(stdin);
+                            if ((pos = strchr(aux_string, '\n')) != NULL) // Validação de entrada
+                              *pos = '\0';
+                              for (i = 0; i < qtd_cargos; i++) {
+                                if (strcasecmp(aux_string, cargos[i]) == 0) { // Comparação de cargos
+                                  aux++; // Incremento de variável auxiliar
+                                  posicao[aux] = i; // Armazena a posição 
+                                  aux_n = 1; // Condição de loop
+                                }
+                              }
+                              if (aux_n != 1) {
+                                aux_n = atoi(aux_string); // Atribuição de valor 0 para auxiliar
+                                if (aux_n <= 0 || aux_n > qtd_cargos) { // Condição de entrada inválida
+                                  printf("\nCARGO INVÁLIDO! TENTE NOVAMENTE...\n");
+                                  loop_ext = 1;
+                                }
+                                    else {
+                                      strcpy(aux_string, cargos[aux_n - 1]); // Atribuição do cargo escolh
+                                    
+                                      for (i = 0; i < cont_f; i++) // Loop para busca de funcionário(a)
+                                        if (strcasecmp(func[i].cargo, aux_string) == 0) { // Comparação de strings
+                                          aux++; // Incremento de variável auxiliar
+                                          posicao[aux] = i; // Armazena a posição do funcionário(a)
+                                        }
+                                    }
+                              }
+                            if (aux == 0) { // Caso não encontre o funcionário(a)
+                              printf("\n>> FUNCIONÁRIO(A) NÃO ENCONTRADO(A)! <<\n");
+                              loop_ext = 1;; // Condição de loop
+                            }
+                    }
+  
+                          if (aux_ext == 3) { // Busca pelo salário
+                            __fpurge(stdin);
+                            printf("\n---------BUSCAR INFORMAÇÕES PELO SALÁRIO---------\n");
+                            printf("Os salários disponíveis são: ");
+                            for (i = 0; i < cont_f; i++) {// Loop para busca de funcionário(a)
+                              printf(">> %.2f << ", func[i].salario);
+                            }  
+                            printf("\nDigite o salário do(a) funcionário(a) buscado: R$");
+                            scanf("%f", &aux_float);
+                            __fpurge(stdin);
+                            for (i = 0; i < cont_f; i++) { // Busca o salário do funcionário(a)
+                              if (func[i].salario == aux_float) { // Caso encontre o funcionário(a)
+                                aux++; // Incremento do contador
+                                posicao[aux] = i; // Armazena a posição do funcionário(a)
+                              }
+                            }
+                                if (aux == 0) { // Caso não encontre o funcionário(a)
+                                      printf("\n>> FUNCIONÁRIO(A) NÃO ENCONTRADO(A)! <<\n");
+                                      loop_ext = 1; // Condição de loop
+                            }
+                      }
+  
+                            if (aux_ext == 4) { // Busca todos os funcionário(a)(s)
+                              __fpurge(stdin);
+                              for (i = 0; i < cont_f; i++) { // Loop para buscar todos os funcionário(a)s
+                                printf("\n---------------------------------------------------");
+                                printf("\nFUNCIONÁRIO(A) %d:", i + 1);
+                                printf("\n---------------------------------------------------\n");
+                                printf("\nO nome do(a) funcionário(a) é: %s", func[i].nome);
+                                printf("\nO cargo do(a) funcionário(a) é: %s", func[i].cargo);
+                                printf("\nO salário do(a) funcionário(a) é: R$%.2f", func[i].salario);
+                                printf("\nA data de contratação do(a) funcionário(a) é: %02d/%02d/%04d", func[i].dia, func[i].mes, func[i].ano);
+                                printf("\nO endereço do(a) funcionário(a) é: %s", func[i].endereco);
+                                printf("\nO telefone do(a) funcionário(a) é: %s", func[i].telefone);
+                                printf("\nO email do(a) funcionário(a) é: %s", func[i].email);
+                                printf("\nO CPF do(a) funcionário(a) é: %s", func[i].cpf);
+                                printf("\n---------------------------------------------------\n\n");
+                              }
+                            }
+                        
+                              if (aux_ext == 5) { // Volta ao menu principal
+                                __fpurge(stdin);
+                                printf("\nVoltando ao menu principal...\n");
+                              }
+                        
+                        } while (loop_ext); // Fim do loop externo
+                        
+                  // Mostra as informações do funcionário(a) encontrado:
+                  while (aux > 0) {
+                    __fpurge(stdin);
+                    printf("\n---------------------------------------------------");
+                    printf("\nFUNCIONÁRIO(A) %d:", posicao[aux] + 1);
+                    printf("\n---------------------------------------------------\n");
+                    printf("\nO nome do(a) funcionário(a) é: %s", func[posicao[aux]].nome);
+                    printf("\nO cargo do(a) funcionário(a) é: %s", func[posicao[aux]].cargo);
+                    printf("\nO salário do(a) funcionário(a) é: R$%.2f", func[posicao[aux]].salario);
+                    printf("\nA data de contratação do(a) funcionário(a) é: %02d/%02d/%04d", func[posicao[aux]].dia, func[posicao[aux]].mes, func[posicao[aux]].ano);
+                    printf("\nO endereço do(a) funcionário(a) é: %s", func[posicao[aux]].endereco);
+                    printf("\nO telefone do(a) funcionário(a) é: %s", func[posicao[aux]].telefone);
+                    printf("\nO email do(a) funcionário(a) é: %s", func[posicao[aux]].email);
+                    printf("\nO CPF do(a) funcionário(a) é: %s", func[posicao[aux]].cpf);
+                    printf("\n---------------------------------------------------\n");
+                    aux--; // Decremento do contador
+                  }
+                }
+                else
+                  printf("\n>> NÃO HÁ FUNCIONÁRIO(A)(S) CADASTRADOS! <<\n");
+                break;
+
+          // Exclusão de funcionário(a)(s):
+          case 4:
+            if (cont_f > 0) { // Verifica se há pelo menos um funcionário(a) cadastrado
+              do {
+                loop_ext = 0;
+                do {
+                  loop = 1; // Reseta o valor de loop para o menu de exclusão
+                  aux = 0; // Reseta o valor de aux o menu de exclusão
+                  printf("\033[31m\033[1m\n---------EXCLUIR FUNCIONÁRIO(A)(S)---------\033[0m\n");
+                  printf("\033[31m\nDigite a forma usada para buscar o(a)(s) funcionário(a)(s) para exclusão: ");
+                  printf("\n1 - PELO NOME \n2 - PELO CARGO \n3 - PELO SALÁRIO \n4 - VOLTAR AO MENU"); 
+                  printf("\n\n-------------------------------------------\n");
+                  printf("\n>> OPÇÃO: ");
+                  fgets(aux_string, x, stdin);
+                  __fpurge(stdin);
+
+                    for(i = 0; i < strlen(aux_string); i++){ // Loop para converte as letras para maiúsculas
+                      aux_string[i] = toupper(aux_string[i]);
+                    }
+
+                    if ((pos = strchr(aux_string, '\n')) != NULL) // Substitui o \n por \0
+                      *pos = '\0';
+                    for (i = 0; i < strlen(aux_string); i++) {
+                      if (isdigit(aux_string[i])) {
+                        aux_n = 1;
+                      }
+                    }
+                      if (aux_n == 0) {
+                        for (i = 0; i < 3; i++)  {
+                          if (strstr(aux_string, sub_menu[i]) != NULL) {
+                            aux_ext = i + 1;
+                            loop = 0;
+                          }
+                        }
+                      }
+                        else {
+                          aux_ext = atoi(aux_string);
+                          __fpurge(stdin);
+                            if (aux_ext >= 1 && aux_ext <= 4) {
+                              loop = 0;
+                            }
+                        }
+                    if (loop == 1)
+                      printf("\n>> OPÇÃO INVÁLIDA! <<\n");
+                  } while (loop);
+  
+                  if (aux_ext == 1) { // Busca pelo nome do funcionário(a)
+                    printf("\n---------EXCLUIR INFORMAÇÕES PELO NOME---------\n");
+                    printf("\nDigite o nome do(a) funcionário(a): ");
+                    fgets(func_aux[0].nome, x, stdin);
+                    __fpurge(stdin);
+                      if ((pos = strchr(func_aux[0].nome, '\n')) != NULL) // Validação de entrada
+                        *pos = '\0';
+
+                      for (i = 0; func_aux[0].nome[i] != '\0'; i++) { // Loop para vericar há acentos no nome digitado
+                        if (strchr(acentos, func_aux[0].nome[i]) == NULL 
+                        && !isspace(func_aux[0].nome[i])) { // Validação de entrada
+                          aux_string[i] = func_aux[0].nome[i]; // Armazena as letras sem acento
+                        }
+                      }
+                        
+                    for (i = 0; i < cont_f; i++) { // Busca o nome do funcionário(a)
+                      if (strcasecmp(aux_string_ext[i], aux_string) == 0) { // Caso encontre o funcionário(a)
+                      aux++; // Incremento do contador
+                      posicao[aux] = i; // Armazena a posição do funcionário(a)
+                      }
+                    }
+                        if (aux == 0) { // Caso não encontre o funcionário(a)
+                          __fpurge(stdin);
+                          printf("\n>> FUNCIONÁRIO(A) NÃO ENCONTRADO(A)! <<\n");
+                          loop_ext = 1;
+                        }
+                  }
+  
+                      if (aux_ext == 2) { // Busca pelo cargo do funcionário(a)
+                        __fpurge(stdin);
+                        printf("\n---------EXCLUIR INFORMAÇÕES PELO CARGO---------\n");
+                        aux_n = 0; 
+                        printf("\nOs cargos disponíveis são: ");
+                          for (i = 0; i < qtd_cargos; i++) 
+                            printf("\n%d - %s", i + 1 , cargos[i]);
+                        printf("\n>> Digite o cargo do(a) funcionário(a) buscado: ");
+                        fgets(aux_string, x, stdin);
+                        __fpurge(stdin);
+                          if ((pos = strchr(aux_string, '\n')) != NULL) // Validação de entrada
+                            *pos = '\0';
+                            for (i = 0; i < qtd_cargos; i++)
+                              if (strcasecmp(aux_string, cargos[i]) == 0) { // Comparação de cargos
+                                aux_n = 1; // Caso encontre o cargo, aux_n recebe 1
+                              }
+                            if (aux_n != 1)
+                              aux_n = atoi(aux_string); // Atribuição de valor 0 para auxiliar
+                              if (aux_n <= 0 || aux_n > qtd_cargos) // Condição de entrada inválida
+                                printf("\nCARGO INVÁLIDO! TENTE NOVAMENTE...\n");
+                                  else {
+                                    strcpy(aux_string, cargos[aux_n - 1]); // Atribuição do cargo escolh
+                                    aux_n = 0; // Condição de loop
+                                  }
+                        
+                        for (i = 0; i < cont_f; i++) // Loop para busca de funcionário(a)
+                          if (strcasecmp(func[i].cargo, aux_string) == 0) { // Comparação de strings
+                            aux++; // Incremento de variável auxiliar
+                            posicao[aux] = i; // Armazena a posição do funcionário(a)
+                          }
+                      
+                          if (aux == 0) { // Caso não encontre o funcionário(a)
+                            printf("\n>> FUNCIONÁRIO(A) NÃO ENCONTRADO(A)! <<\n");
+                            loop_ext = 1;
+                          }
+                      }
+  
+                        if (aux_ext == 3) { // Busca pelo sexo do funcionário(a)
+                          __fpurge(stdin);
+                            printf("\n---------EXCLUIR INFORMAÇÕES PELO SALÁRIO---------\n");
+                            printf("Os salários disponíveis são: ");
+                              for (i = 0; i < cont_f; i++) // Loop para busca de funcionário(a)
+                                printf(">> %.2f << ", func[i].salario);
+                            printf("\nDigite o salário do(a) funcionário(a) buscado: R$");
+                            scanf("%f", &aux_float);
+                            __fpurge(stdin);
+                              for (i = 0; i < cont_f; i++) // Busca o salário do funcionário(a)
+                                if (func[i].salario == aux_float) { // Caso encontre o funcionário(a)
+                                  aux++; // Incremento do contador
+                                  posicao[aux] = i; // Armazena a posição do funcionário(a)
+                                }
+                                  if (aux == 0) { // Caso não encontre o funcionário(a)
+                                        printf("\n>> FUNCIONÁRIO(A) NÃO ENCONTRADO(A)! <<\n");
+                                        loop_ext = 1;
+                                  }
+                        }
+                          
+                          if (aux_ext == 4) { // Volta ao menu principal
+                            __fpurge(stdin);
+                            printf("\nVoltando ao menu principal...\n");
+                          }
+              } while (loop_ext); // Loop para sair do submenu
+              // Mostra as informações do(a) funcionário(a) encontrado(a) para exclusão:
+              while (aux > 0) {
+                __fpurge(stdin);
+                printf("\n---------EXCLUIR FUNCIONÁRIO(A)(S)---------\n");
+                printf("\n---------------------------------------------------");
+                printf("\nFUNCIONÁRIO(A) %d:", posicao[aux] + 1);
+                printf("\n---------------------------------------------------\n");
+                printf("\nO nome do(a) funcionário(a) é: %s", func[posicao[aux]].nome);
+                printf("\nO cargo do(a) funcionário(a) é: %s", func[posicao[aux]].cargo);
+                printf("\nO salário do(a) funcionário(a) é: R$%.2f", func[posicao[aux]].salario);
+                printf("\nA data de contratação do(a) funcionário(a) é: %02d/%02d/%04d", func[posicao[aux]].dia, func[posicao[aux]].mes, func[posicao[aux]].ano);
+                printf("\nO endereço do(a) funcionário(a) é: %s", func[posicao[aux]].endereco);
+                printf("\nO telefone do(a) funcionário(a) é: %s", func[posicao[aux]].telefone);
+                printf("\nO email do(a) funcionário(a) é: %s", func[posicao[aux]].email);
+                printf("\nO CPF do(a) funcionário(a) é: %s", func[posicao[aux]].cpf);
+                printf("\n---------------------------------------------------\n");
+
+                do { // Loop para confirmação da exclusão
+                  loop = 0;
+                  printf("\nTem certeza que deseja excluir o(a) funcionário(a)? (S/N)\n");
+                  scanf("%c", &aux_c);
+                  __fpurge(stdin);
+                  if (aux_c != 'S' && aux_c != 's' 
+                      && aux_c != 'N' && aux_c != 'n') {
+                    printf("\n>> OPÇÃO INVÁLIDA! << \nTente novamente...\n");
+                    loop = 1;
+                      }
+                } while (loop); // Condição para confirmar exclusão
+
+                if (aux_c == 'S' || aux_c == 's') { // Caso o usuário confirme a exclusão
+                  // Excluindo o funcionário(a):
+                  strcpy(func[posicao[aux]].nome, " ");
+                  strcpy(func[posicao[aux]].cargo, " ");
+                  func[posicao[aux]].salario = 0;
+                  func[posicao[aux]].dia = 00;
+                  func[posicao[aux]].mes = 00;
+                  func[posicao[aux]].ano = 0000;
+                  strcpy(func[posicao[aux]].endereco, " ");
+                  strcpy(func[posicao[aux]].telefone, " ");
+                  strcpy(func[posicao[aux]].email, " ");
+                  strcpy(func[posicao[aux]].cpf, " ");
+                  cont_f--;
+                  printf("\nFUNCIONÁRIO(A) EXCLUÍDO(A) COM SUCESSO!\n");
+              }
+                  else if (aux_c == 'N' || aux_c == 'n') { // Caso o usuário não confirme a exclusão
+                    printf("\nEXCLUSÃO CANCELADA!\n");
+                    break;
+                  }
+                aux--; // Decremento do contador
+              }
+            }
+              else
+                printf("\n>> NÃO HÁ FUNCIONÁRIO(A)(S) CADASTRADO(A)(S)! <<\n");
+              break;
+
+                  // Fechar programa:
+                  case 5:
+                  fechar_p = 0; // Zera a variavel de fechamento do programa (acaba com o loop infinito)
+                  printf("\033[30m\033[1m\n>> PROGRAMA ENCERRADO! <<\033[0m\n");
+                  break;
+                }
+  } while (fechar_p); // Loop infinito até que o usuário escolha fechar o programa
+return 0;
+}

@@ -1,0 +1,380 @@
+#include "meu_programa.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+#define MAX 10
+
+/* Estrutura p/ armazenar datas */
+typedef struct { 
+  int dia, mes, ano;
+} Data;
+
+/* Estrutura p/ armazenar horas */
+typedef struct {
+  int hora, minuto, segundo;
+} Hora; 
+
+/* Tipos de transações */
+typedef enum { 
+  DEBITO,
+  CREDITO
+} TipoTransacao;
+
+/* Estrutura p/ armazenar uma transação */
+typedef struct transacao { 
+  TipoTransacao tipo;
+  int ID;
+  float valor;
+  Data data;
+  Hora hora;
+  char descricao[100]; 
+} Transacao;
+
+/* Estrutura p/ armazenar a lista */
+struct lista { 
+  int FL;
+  Transacao trans[MAX];
+};
+
+typedef struct lista Lista;
+
+/* Cria a lista */
+Lista *Cria_lista(void) {
+  Lista *pt = (Lista *)malloc(sizeof(Lista));
+  if (pt != NULL) // Se a lista foi criada com sucesso
+    pt->FL = 0;
+  return pt;
+}
+
+/* Libera a lista */
+Lista *Libera_lista(Lista *Ptl) {
+  free(Ptl);
+  return NULL;
+}
+
+/* Insere um elemento no final da lista */
+Lista *Insere_elem(Lista *Ptl, Transacao info) {
+  if (Ptl == NULL || Ptl->FL == MAX) // Se a lista não foi criada ou está cheia
+    return Ptl;
+  Ptl->trans[Ptl->FL] = info;
+  Ptl->FL++;
+  return Ptl;
+}
+
+/* Remove um elemento da lista movendo os elementos restantes */
+Lista *Remove_elem_mov(Lista *Ptl, int valor_ID) {
+  int i, k;
+  if (Ptl == NULL || Ptl->FL == 0) // Se a lista não foi criada ou está vazia
+    return Ptl;
+
+  // Procura o elemento na lista
+  i = 0;
+  while (i < Ptl->FL && Ptl->trans[i].ID != valor_ID)
+    i++;
+
+  if (i == Ptl->FL) // Se o elemento não foi encontrado
+    return Ptl;
+
+  // Remove o elemento da lista
+  for (k = i; k < Ptl->FL - 1; k++)
+    Ptl->trans[k] = Ptl->trans[k + 1];
+
+  Ptl->FL--; // Atualiza o tamanho da lista
+  return Ptl;
+}
+
+/* Remove um elemento da lista substituindo pelo último */
+Lista *Remove_elem(Lista *Ptl, int valor_ID) {
+  int i;
+  if (Ptl != NULL) { // Se a lista foi criada
+    i = 0;
+    while (i < Ptl->FL && Ptl->trans[i].ID != valor_ID) // Procura o elemento na lista
+      i++;
+    if (i == Ptl->FL) { // Se o elemento não foi encontrado
+      return Ptl; 
+    }
+    Ptl->trans[i] = Ptl->trans[Ptl->FL - 1]; // Substitui pelo último
+    Ptl->FL--; // Atualiza o tamanho da lista
+  }
+  return Ptl;
+}
+
+/* Retorna o elemento da posição dada */
+int Consulta_nodo(Lista *Ptl, int valor_ID, Transacao *info) {
+  if (Ptl == NULL || Ptl->FL == 0) // Se a lista não foi criada
+    return 0;
+  int i;
+  for (i = 0; i < Ptl->FL; i++) { // Percorre a lista
+    if (Ptl->trans[i].ID == valor_ID) { // Se encontrou o elemento
+      *info = Ptl->trans[i];
+      return 1;
+    }
+  }
+  return 0;
+}
+
+/* Retorna o tamanho da lista */
+int Tamanho_lista(Lista *Ptl) {
+  if (Ptl == NULL) // Se a lista não foi criada
+    return -1;
+  return Ptl->FL;
+}
+
+/* Verifica se a lista está cheia */
+int E_cheia(Lista *Ptl) {
+  if (Ptl == NULL) { // Se a lista não foi criada
+    return -1;
+  }
+  if (Ptl->FL == MAX) { // Se a lista está cheia
+    return 1;
+  }
+  return 0;
+}
+
+/* Verifica se a lista está vazia */
+int E_vazia(Lista *Ptl) { 
+  if (Ptl == NULL) // Se a lista não foi criada
+    return -1;
+  if (Ptl->FL == 0) // Se a lista está vazia
+    return 1;
+  return 0;
+}
+
+/* Limpa o buffer do teclado */
+void Limpa_buffer() { 
+  char c;
+  while ((c = getchar()) != '\n' && c != EOF);
+}
+
+/* Limpa a tela do terminal */
+void Cls_screen() { 
+  #ifdef _WIN32 // Verifica se o sistema é Windows
+    system("cls");
+  #else // Caso contrário, assume que é um sistema Unix
+    system("clear");
+  #endif 
+}
+
+/* Aguarda uma entrada do usuário p/ limpar a tela do terminal */
+void Limpa_tela() {
+  printf("%s\nAperte %s[ENTER]%s p/ continuar...", rset, azul, rset);
+  Limpa_buffer();
+  Cls_screen();
+}
+
+/* Exibe uma barra de divisão */
+void Barra_div(const char *i, const char *f) {
+  printf("%s%s<>%s==============%s<>%s==============%s<>%s%s", i, cian, rset, mage, rset, cian, rset, f);
+}
+
+/* Solicita e retorna a confirmação de uma ação do usuário */
+int Sim_ou_nao(const char *msg) { 
+  while (1) {
+    Limpa_tela();
+    Barra_div("", "\n");
+    printf("Tem certeza que deseja %s%s?%s", azul, msg, rset);
+    printf("[S|N]: ");
+    char resp = getchar();
+    Limpa_buffer();
+    if (resp == 's' || resp == 'S' || resp == '1') { // Se a resposta for sim
+      return 1;
+    } else if (resp == 'n' || resp == 'N' || resp == '0') { // Se a resposta for não
+      return 0;
+    } else { // Se a resposta for inválida
+      printf("\n%s[Opção inválida!]%s\n", verm, rset);
+    }
+  }
+}
+
+/* Exibe a lista de transações */
+int Exibe_lista(Lista *Ptl) { 
+  if (Ptl == NULL) { // Se a lista não foi criada
+    printf("\n[Lista não existe!]\n");
+    return -1;
+  }
+  for (int i = 0; i < Ptl->FL; i++) { // Percorre a lista
+    Barra_div("", "\n");
+    printf("%s╔═════════════════════════════╗%s\n", azul, rset);
+    printf("%s║ [Transação ID: %04d]        ║%s\n", azul, Ptl->trans[i].ID, rset);
+    printf("%s╚═════════════════════════════╝%s\n", azul, rset);
+    printf("%sTipo:       %-20s%s\n", azul, Ptl->trans[i].tipo == DEBITO ? "Débito" : "Crédito", rset);
+    printf("%sValor:      R$ %10.2f%s\n", azul, Ptl->trans[i].valor, rset);
+    printf("%sData:       %02d/%02d/%04d%s\n", azul, Ptl->trans[i].data.dia, Ptl->trans[i].data.mes, Ptl->trans[i].data.ano, rset);
+    printf("%sHora:       %02d:%02d:%02d%s\n", azul, Ptl->trans[i].hora.hora, Ptl->trans[i].hora.minuto, Ptl->trans[i].hora.segundo, rset);
+    printf("%sDescrição:  %-20s%s\n", azul, Ptl->trans[i].descricao, rset);
+    Barra_div("", "\n");
+  }
+  return 1;
+}
+
+/* Grava a lista em um arquivo */
+int Grava_lista(Lista *Ptl, char *nome_arqv) { 
+  if (Ptl == NULL) { // Se a lista não foi criada
+    printf("\n[Lista não existe!]\n");
+    return -1;
+  }
+  FILE *fp = fopen(nome_arqv, "w"); // Abre o arquivo para escrita
+  if (fp == NULL) { // Se o arquivo não foi aberto
+    printf("\n[Erro ao abrir o arquivo %s]\n", nome_arqv);
+    exit(EXIT_FAILURE);
+  }
+  for (int i = 0; i < Ptl->FL; i++) { // Percorre a lista
+    fprintf(fp, "%d\n", Ptl->trans[i].ID);
+    fprintf(fp, "%d\n", Ptl->trans[i].tipo);
+    fprintf(fp, "%.2f\n", Ptl->trans[i].valor);
+    fprintf(fp, "%d\n", Ptl->trans[i].data.dia);
+    fprintf(fp, "%d\n", Ptl->trans[i].data.mes);
+    fprintf(fp, "%d\n", Ptl->trans[i].data.ano);
+    fprintf(fp, "%s\n", Ptl->trans[i].descricao);
+  }
+  fclose(fp); // Fecha o arquivo
+  return 1;
+}
+
+/* Função para exibir o menu e capturar a escolha do usuário */
+int Escolha_menu() {
+  int opcao;
+  Limpa_tela();
+  string titulo = cnt_cx(" MENU DE TRANSAÇÕES🪙 ", brd_crv, mage, cian, 20);
+  string opcoes = cnt_cx(" [1] Inserir transação \n [2] Remover transação \n [3] Exibir transações \n [4] Gravar transações \n [5] Salvar transações \n [0] Sair ", brd_crv, amar, cian, 0);
+  string menus = cnt_cx(concat_str(concat_str(titulo, new_str("\n")), opcoes).dados, brd_crv, amar, cian, 0);
+  printf("%s\n", menus.dados);
+  printf("%sOpcao: %s", azul, rset);
+  scanf("%d", &opcao);
+  Limpa_buffer();
+  return opcao;
+}
+
+/* Retorna a data atual */
+Data Get_data() { 
+  Data data;
+  time_t t = time(NULL);
+  struct tm tm = *localtime(&t);
+  data.dia = tm.tm_mday;
+  data.mes = tm.tm_mon + 1;
+  data.ano = tm.tm_year + 1900;
+  return data;
+}
+
+/* Retorna a hora atual */
+Hora Get_hora() { 
+  Hora hora;
+  time_t t = time(NULL);
+  struct tm tm = *localtime(&t);
+  hora.hora = tm.tm_hour;
+  hora.minuto = tm.tm_min;
+  hora.segundo = tm.tm_sec;
+  return hora;
+}
+
+/* Função para capturar os dados da transação */
+Transacao Get_transacao() { 
+  Transacao trans;
+  printf("\n[Inserir transação]\n");
+  printf("ID: ");
+  scanf("%d", &trans.ID);
+  Limpa_buffer();
+  printf("Tipo (0 - Débito, 1 - Crédito): ");
+  scanf("%d", &trans.tipo);
+  Limpa_buffer();
+  printf("Valor R$: ");
+  scanf("%f", &trans.valor);
+  Limpa_buffer();
+  printf("Descrição: ");
+  scanf("%99[^\n]", trans.descricao);
+  Limpa_buffer();
+  trans.data = Get_data();
+  trans.hora = Get_hora();
+  return trans;
+}
+
+/* Exibe uma transação da lista */
+void Exibe_transacao(Transacao info) {
+  Barra_div("", "\n");
+  printf("%s╔═════════════════════════════╗%s\n", azul, rset);
+  printf("%s║ [Transação ID: %04d]        ║%s\n", azul, info.ID, rset);
+  printf("%s╚═════════════════════════════╝%s\n", azul, rset);
+  printf("%sTipo:       %-20s%s\n", azul, info.tipo == DEBITO ? "Débito" : "Crédito", rset);
+  printf("%sValor:      R$ %10.2f%s\n", azul, info.valor, rset);
+  printf("%sData:       %02d/%02d/%04d%s\n", azul, info.data.dia, info.data.mes, info.data.ano, rset);
+  printf("%sHora:       %02d:%02d:%02d%s\n", azul, info.hora.hora, info.hora.minuto, info.hora.segundo, rset);
+  printf("%sDescrição:  %-20s%s\n", azul, info.descricao, rset);
+  Barra_div("", "\n");
+}
+
+
+int main(void) {
+  Lista *minhas_transacoes = Cria_lista();
+  Transacao info;
+  bool loop = true;
+  int opcao, aux;
+  float temp;
+  char nome[100];
+  while (loop) { // Loop principal do programa
+    if ((opcao = Escolha_menu()) == 1) { // Inserir transação
+      if (!E_cheia(minhas_transacoes)) { // Verifica se a lista não está cheia
+        Limpa_tela();
+        minhas_transacoes = Insere_elem(minhas_transacoes, Get_transacao());
+      } else { // Se a lista está cheia
+        printf("\n[Lista de transações cheia!]\n");
+      }
+    } else if (opcao == 2) { // Remover transação
+      if (!E_vazia(minhas_transacoes)) { // Verifica se a lista não está vazia
+        Limpa_tela();
+        printf("\n[Remover transação]\n");
+        printf("ID: ");
+        scanf("%d", &aux);
+        limpa_buffer();
+        minhas_transacoes = Remove_elem(minhas_transacoes, aux);
+      } else { // Se a lista está vazia
+        printf("\n[Lista de transações vazia!]\n");
+      }
+    } else if (opcao == 3) { // Consultar transação
+      if (!E_vazia(minhas_transacoes)) { // Verifica se a lista não está vazia
+        Limpa_tela();
+        printf("\n[Consultar transação]\n");
+        printf("ID: ");
+        scanf("%d", &aux);
+        limpa_buffer();
+        if (Consulta_nodo(minhas_transacoes, aux, &info)) { // Verifica se a consulta foi bem-sucedida
+          Exibe_transacao(info);
+        } else { // Se a consulta não foi bem-sucedida
+          printf("\n[Transação não encontrada!]\n");
+        }
+      } else { // Se a lista está vazia
+        printf("\n[Lista de transações vazia!]\n");
+      }
+    } else if (opcao == 4) { // Exibir transações
+      if (!E_vazia(minhas_transacoes)) { // Verifica se a lista não está vazia
+        Limpa_tela();
+        Exibe_lista(minhas_transacoes);
+      } else { // Se a lista está vazia
+        printf("\n[Lista de transações vazia!]\n");
+      }
+    } else if (opcao == 5) { // Salvar transações
+      if (!E_vazia(minhas_transacoes)) {
+        Limpa_tela();
+        printf("\n[Gravar lista em arquivo]\n");
+        printf("Nome do arquivo: ");
+        scanf("%99[^\n]", nome);
+        limpa_buffer();
+        Grava_lista(minhas_transacoes, nome);
+      } else { // Se a lista está vazia
+        printf("\n[Lista de transações vazia!]\n");
+      }
+    } else if (opcao == 0) { // Sair
+      if (Sim_ou_nao("Tem certeza que deseja sair?")) {
+        printf("\n%s[Saindo...]%s\n", azul, rset);
+        loop = false;
+      } else {
+        printf("\n%s[Voltando ao menu...]%s\n", azul, rset);
+      }
+    } else {
+      printf("\n[Opção inválida!]\n");
+    }
+  }
+}

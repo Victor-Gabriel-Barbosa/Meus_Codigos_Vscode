@@ -1,0 +1,15 @@
+- **CPU (Unidade Central de Processamento)**: É o componente principal de um computador responsável por executar instruções e processar dados. Sua função é interpretar e executar comandos de software.
+
+- **Diferença entre RAM e ROM**: 
+  - *RAM (Memória de Acesso Aleatório)* é uma memória volátil usada para armazenar dados temporários enquanto o computador está ligado.
+  - *ROM (Memória Somente de Leitura)* é uma memória não volátil que armazena dados permanentes, como o firmware.
+
+- **Memória Cache**: É uma memória rápida e de pequeno tamanho localizada dentro ou próxima à CPU. Ela armazena temporariamente dados e instruções frequentemente acessados, reduzindo o tempo de acesso e acelerando o processamento.
+
+- **Barramento de Comunicação**: É um sistema de caminhos elétricos através dos quais dados e sinais de controle são transferidos entre os componentes de um computador, como a CPU, a memória e dispositivos de entrada/saída.
+
+- **Registradores**: São pequenas unidades de armazenamento dentro da CPU que armazenam dados temporários e instruções durante a execução de processos. Eles são essenciais para o processamento rápido de dados.
+
+- **Barramentos de Controle e Dados**: 
+  - *Barramentos de Controle* transportam sinais de controle para coordenar as operações dos componentes do computador.
+  - *Barramentos de Dados* transportam dados entre os componentes, permitindo a comunicação e o processamento.
