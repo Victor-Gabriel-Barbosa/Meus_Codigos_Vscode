@@ -6,6 +6,13 @@
             "name": "main_minecraft",
             "request": "launch",
             "mainClass": "main_minecraft",
+            "projectName": "Meus_Codigos_Vscode_63d71536"
+        },
+        {
+            "type": "java",
+            "name": "main_minecraft",
+            "request": "launch",
+            "mainClass": "main_minecraft",
             "projectName": "Programas_98aa9783"
         },
         {
