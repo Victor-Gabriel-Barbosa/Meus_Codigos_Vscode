@@ -21,8 +21,12 @@ class Bloco {
     if (ID < 0) return false;
     this.ID = ID;
     return true;
-
   }
+
+  public void setSolido(boolean solido) {
+    this.solido = solido;
+  }
+
 
   public int getID() {
     return ID;

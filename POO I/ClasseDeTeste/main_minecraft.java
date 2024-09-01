@@ -1,6 +1,7 @@
+import java.awt.desktop.SystemSleepEvent;
 import java.util.Scanner;
 
-public class main_minecraft {
+public class Main_minecraft {
   public static void main(String[] args) {
     // Criando um objeto da classe bloco
     Scanner scanner = new Scanner(System.in);
@@ -21,7 +22,7 @@ public class main_minecraft {
       System.out.println("--------------------------------");
       System.out.print(caixa_opcoes);
       System.out.println("--------------------------------");
-      System.out.print("Digite o ID do bloco para alterar seu nome: ");
+      System.out.print("Digite o ID do bloco para alterar: ");
       idAlterar = scanner.nextInt();
       for (int i = 0; i < blocos.length; i++) {
         if (blocos[i].getID() == idAlterar) {
@@ -36,9 +37,15 @@ public class main_minecraft {
 
     for (int i = 0; i < blocos.length; i++) {
       if (blocos[i].getID() == idAlterar) {
+        System.out.print("Digite o novo ID do bloco: ");
+        int novoID = scanner.nextInt();
         System.out.print("Digite o novo nome do bloco: ");
       String nomeAlterar = scanner.next();
+        System.out.print("Digite o novo estado do bloco: ");
+        boolean novoSolido = scanner.nextBoolean();
+        blocos[i].setID(novoID);
         blocos[i].setNome(nomeAlterar);
+        blocos[i].setSolido(novoSolido);
         break;
       }
     }
