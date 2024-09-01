@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Main_p1",
+            "request": "launch",
+            "mainClass": "Main_p1",
+            "projectName": "Meus_Codigos_Vscode_63d71536"
+        },
+        {
+            "type": "java",
             "name": "main_minecraft",
             "request": "launch",
             "mainClass": "main_minecraft",
