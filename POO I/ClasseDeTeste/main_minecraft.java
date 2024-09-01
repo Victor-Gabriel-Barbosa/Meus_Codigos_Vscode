@@ -17,6 +17,7 @@ public class main_minecraft {
       caixa_opcoes += ((blocos[i].isSolido() == true) ? "[Solido]" : "[Vazio]") + " " + blocos[i].getNome() + " " + blocos[i].getID() + "\n";
     }
     while (loop) {
+      LimparTela.limpar("Aperte [ENTER] para continuar...");
       System.out.println("--------------------------------");
       System.out.print(caixa_opcoes);
       System.out.println("--------------------------------");
