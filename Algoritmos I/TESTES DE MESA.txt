@@ -1,0 +1,19 @@
+|TESTES DE MESA|
+Lista de Ponteiros (1):
+Entrada: x = 3, y = 4;
+*px = x = 3;
+*py = y = 4;
+px = py = 4; // px aponta para py
+*py = (*py)*(*px) = 4 * 4 = 16 
+*px = *px + 2 = 16 + 2 = 18 
+Saída: x = 3, y = 18;
+
+Lista de Ponteiros (2):
+Entrada: a = 4; b = 3;
+p1 = &a = 4;
+p2 = p1 = 4; // p2 aponta para p1;
+*p2 = *p1 + 3 = 4 + 3 = 7;
+b = b * (*p1) = 3 * 7 = 21;
+(*p2)++ = 7 + 1 = 8
+p1 = &b = 21;
+Saída: *p1 = 21, *p2 = 8, a = 8, b = 21;

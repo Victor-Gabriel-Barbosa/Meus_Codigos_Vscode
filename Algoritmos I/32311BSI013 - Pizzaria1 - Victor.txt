@@ -1,0 +1,53 @@
+#include <string.h>
+#include <stdio.h>
+#define x 100
+int main()
+{
+int i;
+typedef struct cliente{
+    int num1, cep1;
+    char nome1[x], comp[x], end[x];
+};
+struct cliente vetc[5];
+
+typedef struct pizza{
+    int cod1, val1;
+    char nome2[x];
+};
+struct pizza vetz[3];
+
+typedef struct pedido{
+    int num2, num3, cod2, cod3;
+    char sit[x];
+};
+struct pedido vetp[6];
+
+
+for(i = 0; i < 3; i++){
+    printf("\nEscreva o código da pizza: ");
+    scanf("%d", &vetz[i].cod1);
+    __fpurge(stdin);
+    printf("Escreva o nome da pizza: ");
+    fgets(vetz[i].nome2, x, stdin);
+    __fpurge(stdin);
+    printf("Escreva o valor da pizza: ");
+    scanf("%d", &vetz[i].val1);
+    __fpurge(stdin);
+}
+for(i = 0; i < 5; i++){
+    printf("\nEscreva o seu número de telefone: ");
+    scanf("%d", &vetc[i].num1);
+    __fpurge(stdin);
+    printf("Escreva o seu nome: ");
+    fflush(stdin);
+    fgets(vetc[i].nome1, x, stdin);
+    __fpurge(stdin);
+    printf("Escreva seu endereço: ");
+    fgets(vetc[i].end, x, stdin);
+    __fpurge(stdin);
+    printf("Escreva o complemento: ");
+    fgets(vetc[i].comp, x, stdin);
+    __fpurge(stdin);
+}
+    return 0;
+}

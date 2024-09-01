@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "configurationProvider": "BartmanAbyss.amiga-debug",
+            "browse": {
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "mergeConfigurations": true,
+            "cppStandard": "c++23",
+            "cStandard": "c23"
+        }
+    ],
+    "version": 4
+}

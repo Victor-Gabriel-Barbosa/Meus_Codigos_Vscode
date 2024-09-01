@@ -1,0 +1,2460 @@
+// Bibliotecas:
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdio_ext.h>
+#include <locale.h>
+#include <string.h>
+#include <ctype.h>
+#include <wchar.h>
+#include <wctype.h>
+#include <time.h>
+
+#define MAX_PERS 5
+#define MAX_BOT 5
+#define TAM_STRING 100
+#define MAX_ELEM 5
+#define MAX_OPCAO 10
+#define MAX_CLASSE 6
+#define MAX_HAB 3
+#define MAX_SIGNO 10
+#define MAX_STATUS 8
+#define MAX_BUFF 21
+#define MAX_DEBUFF 17
+#define MAX_HAB_MOD 12
+
+int verificaNumero(char *validacao) {
+    char *ptr;
+    long ret;
+
+    ret = strtol(validacao, &ptr, 10);
+
+    if (*ptr != '\0' || ret < 0) {
+        printf("A entrada não é um número inteiro não-negativo...\n");
+        return -1;
+    } else {
+        return (int)ret;
+    }
+}
+
+int nome_valido(char *valido) {
+    int j;
+    char letras[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzáéíóúÁÉÍÓÚâêîôûÂÊÎÔãõÃçÇ ";
+  // Verifica se a primeira letra é minúscula
+    if (valido[0] >= 'a' && valido[0] <= 'z') {
+        return 0;
+    }
+
+    // Verifica se o caractere é uma letra, espaço ou acentuado
+    for (j = 0; j < strlen(valido); j++) {
+        if (strchr(letras, valido[j]) == NULL) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+int main(void) {
+  setlocale(LC_ALL, "Portuguese");
+  
+  // Variáveis:
+  char nome_aux[MAX_PERS][TAM_STRING], validacao[TAM_STRING], validacao_aux[TAM_STRING], sim_ou_nao, senha[TAM_STRING] = {"RimuruTPEST"};
+  char menu_p[MAX_OPCAO][TAM_STRING] = {"Fech", "Cadast", "Adcio", "Modif", "Consult", "Excl", "Cria", "Proc", "Delet", "Simul", "Inic"};
+  char menu_habi[MAX_HAB][TAM_STRING] = {"Reforço", "Penalidade"};
+  char menu_s[MAX_STATUS][TAM_STRING] = {"Ataque", "Defesa", "Vida", "Velocidade", "Crítico", "Dano", "Eficácia", "Resistência"};
+  char elementos_aux[MAX_ELEM][TAM_STRING] = {"Fogo", "Terra", "Água", "Luz", "Trevas"};
+  char classes_aux[MAX_CLASSE][TAM_STRING] = {"Guerreiro", "Cavaleiro", "Mago", "Ladrão", "Tece-almas", "Atirador"};
+  char signos_aux[MAX_SIGNO][TAM_STRING] = {"Áries", "Touro", "Gêmeos", "Câncer", "Leão", "Virgem", "Libra", "Escorpião", "Sagitário", "Capricórnio"};
+  int i, j, aux = 0, aux_ext = 0, tam_nome, loop, loop_ext = 0, loop_aux, loop_ext_aux, loop_menu = 1, escolha, escolha_menu, cont_p = 0, cont_h[MAX_PERS] = {0, 0, 0, 0, 0}, cont_b = 0, posi[MAX_PERS], posi_ext[MAX_PERS], posi_valid = 0, repetido_h[MAX_HAB] = {-1, -1, -1}, repetido_p[MAX_PERS] = {0, 0, 0, 0, 0}, pts_status, pts_habilidade, hab_escolhida, dano_btl = 0;
+  
+  int pst_qtd = 1000,
+  phb_qtd = 3,
+  atk = 4, max_atk = 7000, 
+  def = 10, max_def = 3000,
+  vida = 1, max_vida = 30000,
+  vel = 10, max_vel = 300,
+  cri = 10, max_cri = 100,
+  dano = 4, max_dano = 350,
+  efic = 4, max_efic = 250,
+  resi = 4, max_resi = 250;
+
+  char buffs[MAX_BUFF][TAM_STRING] = {"Aumento de ATK", "Aumento de ATK Superior", "Aumento de DEF", "Aumento de VEL", "Aumento de CRIT", "Aumento de DANO CRIT", "Aumento de EFIC", "Aumento de RESI", "Aumento de Esquiva", "Anti-crítico", "Barreira", "Imunidade", "Cura Contínua", "Nulificador", "Imortal", "Invencível", "Reviver", "Contra-ataque", "Vigor", "Raiva", "Percepção"};
+  float buf_utl[MAX_BUFF] = {0.5, 0.75, 0.6, 0.3, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.3, 1.0, 0.15, 1.0, 1.0, 1.0, 1.0, 1.0, 0.3, 0.1, 0.15];
+  float buf_btl[MAX_BUFF] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int cdwn_b_btl[MAX_BUFF] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  
+  char debuffs[MAX_DEBUFF][TAM_STRING] = {"Diminuir ATK", "Reduzir Defesa", "Diminuir VEL", "Reduzir Acerto", "Atordoamento", "Sono", "Incurável", "Bloqueio de Reforço", "Silêncio", "Provocação", "Envenenamento", "Queima", "Sangramento", "Bomba", "Alvo", "Contenção", "Mácua"};
+  float deb_utl[MAX_DEBUFF] = {0.5, 0.7, 0.3, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.05, 0.3, 0.1, 0.5, 0.15, 1.0, 0.5};
+  float deb_btl[MAX_DEBUFF] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int cdwn_d_btl[MAX_DEBUFF] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  
+  char habilidade_mod[MAX_HAB_MOD][TAM_STRING] = {"Penetração", "Aumento de Prontidão", "Redução de Prontidão", "Aumento de Cooldown de Habilidade", "Redução de Cooldown de Habilidade", "Aumento de Cooldown de Buff", "Redução de Cooldown de Buff", "Aumento de Cooldown de Debuff", "Redução de Cooldown de Debuff", "Remoção de Buff", "Remoção de Debuff", "Extinção"};
+  float hab_utl[MAX_HAB_MOD] = {0.5, 0.4, 0.4, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.0};
+  float hab_btl[MAX_HAB_MOD] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int cdwn_h_btl[MAX_HAB_MOD] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int ATK_btl = 1, DANO_CRIT_btl = 1, DEF_btl = 0, CRIT_btl = 1, EFIC_btl = 1, RESIST_btl = 1, VEL_btl = 1, ESQV_btl = 1, ACERT_btl = 1;
+
+  
+  typedef struct personagem {
+    char nome[TAM_STRING];
+    char elemento[TAM_STRING];
+    char classe[TAM_STRING];
+    char signo[TAM_STRING];
+  
+      struct habilidades {
+        char nome[TAM_STRING];
+        int mod[MAX_HAB_MOD];
+  
+          struct cooldown_h {
+          int cooldown_h[MAX_HAB];
+          } cooldown_h;
+        struct cooldown_h c_h[1];
+  
+          struct buffs {
+            int buff_vet[MAX_BUFF], debuff_vet[MAX_DEBUFF];
+  
+            struct cooldown_buffs {
+              int cooldown_b[MAX_BUFF], cooldown_d[MAX_DEBUFF];
+            } cooldown_buffs;
+          struct cooldown_buffs c_b[1];
+  
+          } buffs;
+        struct buffs b[1];
+  
+      } habilidades;
+    struct habilidades h[MAX_HAB];
+    int ataque, defesa, vida, velocidade, critico, dano_critico, eficacia, resistencia, esquiva, acerto;
+  } Personagem;
+  Personagem p[MAX_PERS];
+
+    typedef struct bots {
+      char nome[TAM_STRING], elemento[TAM_STRING];
+      int def, resi, redu;
+    } bot;
+  struct bots b[MAX_BOT];
+  
+  for (i = 0; i < MAX_PERS; i++) {
+    for (j = 0; j < MAX_HAB; j++) {
+      p[i].h[j].b[0].buff_vet[i] = 0;
+    }
+  }
+  
+  for (i = 0; i < MAX_PERS; i++) {
+      strcpy(p[i].nome, " ");
+      strcpy(p[i].elemento, " ");
+      strcpy(p[i].classe, " ");
+      strcpy(p[i].signo, " ");
+      p[i].ataque = 0;
+      p[i].defesa = 0;
+      p[i].vida = 0;
+      p[i].velocidade = 0;
+      p[i].critico = 0;
+      p[i].dano_critico = 0;
+      p[i].eficacia = 0;
+      p[i].resistencia = 0;
+      p[i].esquiva = 0;
+      p[i].acerto = 0;
+  }
+
+  // Personagem de Teste:
+  strcpy(p[0].nome, "Ras");
+  strcpy(p[0].elemento, "Fogo");
+  strcpy(p[0].classe, "Guerreiro");
+  strcpy(p[0].signo, "Áries");
+  strcpy(p[0].h[0].nome, "Soco");
+  strcpy(p[0].h[1].nome, "Chute");
+  strcpy(p[0].h[2].nome, "Espadada");
+  cont_p = 1;
+
+  //Bot de teste:
+  strcpy(b[0].nome, "Bot");
+  b[0].def = 0;
+  b[0].resi = 0;
+  b[0].redu = 0;
+  cont_b = 1;
+  
+  // Menu Principal:
+  printf(">> *BEM VINDO AO SIMULADOR DE EPIC 7!* <<\n");
+  do {
+    do {
+      __fpurge(stdin);
+      printf("\nAperte ENTER para continuar...");
+      getchar();
+      __fpurge(stdin);
+      system("clear");
+      loop = 1;
+      escolha_menu = 0;
+      printf("\n------------ MENU DE OPÇÕES ------------\n");
+      printf("\n[1] Cadastrar Personagem");
+      printf("\n[2] Adcionar Atributos");
+      printf("\n[3] Modificar Habilidades");
+      printf("\n[4] Consultar Personagem");
+      printf("\n[5] Excluir Personagem");
+      printf("\n[6] Criar Bot");
+      printf("\n[7] Procurar Bot");
+      printf("\n[8] Deletar Bot");
+      printf("\n[9] Simulação de Dano");
+      printf("\n[10] Iniciar Batalha");
+      printf("\n[0] Fechar Programa");
+      printf("\n\n----------------------------------------\n");
+      printf("\n>> Opção: ");
+      fgets(validacao, TAM_STRING, stdin);
+      __fpurge(stdin);
+      validacao[strlen(validacao)-1] = L'\0';
+        if (atoi(validacao) > 0 && atoi(validacao) <= MAX_OPCAO) {
+          loop = 0;
+          escolha_menu = atoi(validacao);
+        }
+        if (loop == 1) {
+          for (i = 0; i < MAX_OPCAO; i++) {
+            if (strcasestr(validacao, menu_p[i]) != NULL) {
+              escolha_menu = i;
+              loop = 0;
+            }
+          }
+          if (loop == 1 && strcasestr(validacao, "0") != NULL && atoi(validacao) == 0) {
+            loop = 0;
+          }
+        }
+        if (loop == 1) {
+          if (strcmp(validacao, senha) == 0) {
+            escolha_menu = 11;
+            loop = 0;
+          }
+              else
+                printf("\n>> Opção Inválida! Tente novamente...\n");
+        }
+    } while (loop);
+    
+    switch (escolha_menu) {
+      case 1:
+        printf("\n>>----< *CADASTRO DE PERSONAGEM* >----<<\n");
+        
+          do {
+            loop = 0;
+            printf("\n>> Nome de personagem: ");
+            fgets(p[cont_p].nome, TAM_STRING, stdin);
+            __fpurge(stdin);
+            p[cont_p].nome[strlen(p[cont_p].nome)-1] = L'\0';
+              if (nome_valido(p[cont_p].nome) == 0) {
+                printf("\n>> Nome Inválido! Tente novamente...\n");
+                loop = 1;
+              }
+            for (i = 0; i < cont_p; i++) {
+              if (strcasecmp(p[cont_p].nome, p[i].nome) == 0) {
+                printf("\n>> Nome já cadastrado! Tente novamente...\n");
+                loop = 1;
+              }
+            }
+          } while (loop);
+        printf("\n>> Nome digitado: %s\n", p[cont_p].nome);
+        
+          do {
+            loop = 1;
+            aux = -1;
+            printf("\nElementos disponíveis: ");
+              for (i = 0; i < MAX_ELEM; i++) 
+                printf("\n> %d - %s", i + 1, elementos_aux[i]);
+            printf("\n>> Opção: ");
+            fgets(validacao, TAM_STRING, stdin);
+            __fpurge(stdin);
+            validacao[strlen(validacao)-1] = L'\0';
+            aux = atoi(validacao);
+  
+            if (isdigit(aux) == 0 && aux > 0 && aux <= MAX_ELEM) {
+              loop = 0;
+              strcpy(p[cont_p].elemento, elementos_aux[aux - 1]);
+            }
+            if (loop == 1) {
+              for (i = 0; i < MAX_ELEM; i++) {
+                if (strcasestr(validacao, elementos_aux[i]) != NULL) {
+                  loop = 0;
+                  strcpy(p[cont_p].elemento, elementos_aux[i]);
+                }
+              }
+            }
+            if (loop == 1)
+              printf("\n>> Opção Inválida! Tente novamente...\n");
+          } while (loop);
+        printf("\n>> Elemento selecionado: %s\n", p[cont_p].elemento);
+  
+          do {
+            loop = 1;
+            aux = -1;
+            printf("\n>> Classes disponíveis: ");
+              for (i = 0; i < MAX_CLASSE; i++) 
+                printf("\n> %d - %s", i + 1, classes_aux[i]);
+              printf("\n>> Opção: ");
+            fgets(validacao, TAM_STRING, stdin);
+            __fpurge(stdin);
+            validacao[strlen(validacao)-1] = L'\0';
+            aux = atoi(validacao);
+  
+            if (isdigit(aux) == 0 && aux > 0 && aux <= MAX_CLASSE) {
+              loop = 0;
+              strcpy(p[cont_p].classe, classes_aux[aux - 1]);
+            }
+            if (loop == 1) {
+              for (i = 0; i < MAX_CLASSE; i++) {
+                if (strcasestr(validacao, classes_aux[i]) != NULL) {
+                  loop = 0;
+                  strcpy(p[cont_p].classe, classes_aux[i]);
+                }
+              }
+            }
+            if (loop == 1)
+              printf("\n>> Opção Inválida! Tente novamente...\n");
+          } while (loop);
+        printf("\n>> Classe selecionada: %s\n", p[cont_p].classe);
+  
+          do {
+            loop = 1;
+            aux = -1;
+            printf("\n>> Signos disponíveis: ");
+              for (i = 0; i < MAX_SIGNO; i++) 
+                printf("\n> %d - %s", i + 1, signos_aux[i]);
+              printf("\n>> Opção: ");
+            fgets(validacao, TAM_STRING, stdin);
+            __fpurge(stdin);
+            validacao[strlen(validacao)-1] = L'\0';
+            aux = atoi(validacao);
+  
+            if (isdigit(aux) == 0 && aux > 0 && aux <= MAX_SIGNO) {
+              loop = 0;
+              strcpy(p[cont_p].signo, signos_aux[aux - 1]);
+            }
+            if (loop == 1) {
+              for (i = 0; i < MAX_SIGNO; i++) {
+                if (strcasestr(validacao, signos_aux[i]) != NULL) {
+                  loop = 0;
+                  strcpy(p[cont_p].signo, signos_aux[i]);
+                }
+              }
+            }
+            if (loop == 1)
+              printf("\n>> Opção Inválida! Tente novamente...\n");
+            } while (loop);
+        printf("\n>> Signo selecionada: %s\n", p[cont_p].signo);
+        
+          for (i = 0; i < MAX_HAB; i++) {
+            do {
+              loop = 0;
+              printf("\n>> Nome da habilidade(%d): ", i + 1);
+              fgets(p[cont_p].h[i].nome, TAM_STRING, stdin);
+              __fpurge(stdin);
+              if (strlen(p[cont_p].h[i].nome) > 0)
+                p[cont_p].h[i].nome[strlen(p[cont_p].h[i].nome)-1] = '\0';
+                if (nome_valido(p[cont_p].h[i].nome) == 0) {
+                  printf("\n>> Nome Inválido! Tente novamente...\n");
+                  loop = 1;
+                }
+              } while (loop);
+            printf("\n>> Nome digitado: %s\n", p[cont_p].h[i].nome);
+          }
+        printf("\n>> *Personagem criado com sucesso!* <<\n");
+        cont_p++;
+      break;
+      
+      case 2:
+        if (cont_p > 0) {
+          do {
+            loop_ext_aux = 0;
+            do {
+              __fpurge(stdin);
+              aux = 0;
+              loop = 1;
+              printf("\n>>------< *ADIÇÃO DE ATRUBUTOS* >------<<\n");
+              printf("\n------------ MENU DE BUSCA ------------\n");
+              printf("\n>> Para buscar personagem você pode usar: ");
+              printf("\n[Nome] [Elemento] [Classe] [Signo]");
+              printf("\n[PARA VOLTAR AO MENU DIGITE VOLTAR[0]]");
+              printf("\n\n>> Busca: ");
+              fgets(validacao, TAM_STRING, stdin);
+              __fpurge(stdin);
+              validacao[strlen(validacao)-1] = L'\0';
+              
+                for (i = 0; i < MAX_PERS; i++) {
+                  if (strcasestr(validacao, p[i].nome) != NULL || 
+                    strcasestr(validacao, p[i].elemento) != NULL || 
+                    strcasestr(validacao, p[i].classe) != NULL || 
+                    strcasestr(validacao, p[i].signo) != NULL) {
+                    aux++;
+                    posi[aux] = i;
+                    loop = 0;
+                    }
+                  }
+              
+                if (loop == 1 && strcasestr(validacao, "volta") == NULL && strcasestr(validacao, "0") == NULL)
+                  printf("\n>> Opção Inválida! Tente novamente...\n");
+                    else 
+                      break;
+            } while (loop);
+  
+            while (aux != 0) {
+              pts_status = pst_qtd;
+              printf("\n---------------------------------------------------");
+              printf("\n*[Personagem encontrado: >> %s <<]*", p[posi[aux]].nome);
+              do {
+                loop_ext = 1;
+                do {
+                  __fpurge(stdin);
+                  aux_ext = -1;
+                  loop = 1;
+                  escolha = 0;
+                  printf("\n---------------------------------------------------\n");
+                  printf("[PONTOS DE STATUS: %d]", pts_status);
+                  printf("\n---------------------------------------------------\n");
+                  printf("\n------------ MENU DE STATUS ------------\n");
+                  printf("\nQual status deseja alterar?\n");
+                  printf("\n1 - ATAQUE[%d]", p[posi[aux]].ataque);
+                  printf("\n2 - DEFESA[%d]", p[posi[aux]].defesa);
+                  printf("\n3 - VIDA[%d]", p[posi[aux]].vida);
+                  printf("\n4 - VELOCIDADE[%d]", p[posi[aux]].velocidade);
+                  printf("\n5 - CRÍTICO[%d%]", p[posi[aux]].critico);
+                  printf("\n6 - DANO CRÍTICO[%d%]", p[posi[aux]].dano_critico);
+                  printf("\n7 - EFICÁCIA[%d%]", p[posi[aux]].eficacia);
+                  printf("\n8 - RESISTÊNCIA[%d%]", p[posi[aux]].resistencia);
+                  printf("\n0 - CANCELAR ALTERAÇÃO");
+                  printf("\n\n----------------------------------------\n");
+                  printf("\n>> Opção: ");
+                  fgets(validacao, TAM_STRING, stdin);
+                  __fpurge(stdin);
+                  validacao[strlen(validacao)-1] = L'\0';
+                  aux_ext = atoi(validacao);
+        
+                    if (isdigit(aux) == 0 && aux_ext > 0 && aux_ext <= MAX_STATUS) {
+                      loop = 0;
+                      escolha = aux_ext; 
+                    }
+                    if (loop == 1) {
+                      for (i = 0; i < MAX_STATUS; i++) {
+                        if (strcasestr(validacao, menu_s[i]) != NULL) {
+                          escolha = i + 1;
+                          loop = 0;
+                        }
+                      }
+                    }
+                    if (loop == 1 && strcasestr(validacao, "volta") == NULL && strcasestr(validacao, "0") == NULL)
+                      printf("\n>> Opção Inválida! Tente novamente...\n");
+                        else 
+                          loop = 0;
+                } while (loop);
+      
+                  if (pts_status > 0) {
+                    switch (escolha) {
+                      case 1:
+                        do {
+                          loop = 0;
+                          printf("\n---------------------------------------------------\n");
+                          printf("[PONTOS DE STATUS: %d]", pts_status);
+                          printf("\n---------------------------------------------------\n");
+                          printf("\n>> Ataque[MAX %d] \n[-%d PST]: ", max_atk, atk);
+                          fgets(validacao, TAM_STRING, stdin);
+                          __fpurge(stdin);
+                          validacao[strlen(validacao)-1] = L'\0';
+                            if (verificaNumero(validacao) == -1) {
+                              printf("\n>> Número Inválido! Tente novamente...\n");
+                              loop = 1;
+                            }
+                              else if ((pts_status - (atoi(validacao) * atk)) < 0) {
+                                printf("\n>> Você não tem Pontos de Status suficientes para essa alteração! Tente novamente...\n");
+                                loop = 1;
+                              }
+                                else if ((atoi(validacao) + p[posi[aux]].ataque) <= max_atk) {
+                                  if (atoi(validacao) != 0) {
+                                    printf("\n[GASTO: %d PST]", atoi(validacao)*atk);
+                                    printf("\n>> Confirmar? [S/N]\n");
+                                    scanf("%c", &sim_ou_nao);
+                                    __fpurge(stdin);
+                                    if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                      p[posi[aux]].ataque = atoi(validacao) + p[posi[aux]].ataque;
+                                      pts_status = pts_status - (p[posi[aux]].ataque * atk);
+                                    }
+                                  }
+                                }
+                                    else if (p[posi[aux]].ataque == max_atk) {
+                                      printf("\n>> Você atingiu o limite máximo de [ATAQUE]! Tente alterar outros status...\n");
+                                    }
+                                      else {
+                                      printf("\n>> Você não pode ultrapassar o limite máximo de [ATAQUE]! Tente novamente...\n");
+                                      loop = 1;
+                                      }
+                        } while (loop);
+                      break;
+                          
+                      case 2:
+                        do {
+                          loop = 0;
+                          printf("\n---------------------------------------------------\n");
+                          printf("[PONTOS DE STATUS: %d]", pts_status);
+                          printf("\n---------------------------------------------------\n");
+                          printf("\nDefesa atual: %d", p[posi[aux]].defesa);
+                          printf("\n>> Defesa[MAX %d] \n[-%d PST]: ", max_def, def);
+                          fgets(validacao, TAM_STRING, stdin);
+                          __fpurge(stdin);
+                          validacao[strlen(validacao)-1] = L'\0';
+                            if (verificaNumero(validacao) == -1) {
+                              printf("\n>> Número Inválido! Tente novamente...\n");
+                              loop = 1;
+                            }
+                              else if ((pts_status - (atoi(validacao) * def)) < 0) {
+                                printf("\n>> Você não tem Pontos de Status suficientes para essa alteração! Tente novamente...\n");
+                                loop = 1;
+                              }
+                                else if ((atoi(validacao) + p[posi[aux]].defesa) <= max_def) {
+                                  if (atoi(validacao) != 0) {
+                                    if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                      printf("\n[GASTO: %d PST]", atoi(validacao)*def);
+                                      printf("\n>> Confirmar? [S/N]\n");
+                                      scanf("%c", &sim_ou_nao);
+                                      __fpurge(stdin);
+                                        if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                          p[posi[aux]].defesa = atoi(validacao) + p[posi[aux]].defesa;
+                                          pts_status = pts_status - (p[posi[aux]].defesa * def);
+                                        }
+                                    }
+                                  }
+                                }
+                                    else if (p[posi[aux]].defesa == max_def) {
+                                      printf("\n>> Você atingiu o limite máximo de [DEFESA]! Tente alterar outros status...\n");
+                                    }
+                                      else {
+                                      printf("\n>> Você não pode ultrapassar o limite máximo de [DEFESA]! Tente novamente...\n");
+                                      loop = 1;
+                                      }
+                        } while (loop);
+                      break;
+                          
+                      case 3:
+                        do {
+                          loop = 0;
+                          printf("\n---------------------------------------------------\n");
+                          printf("[PONTOS DE STATUS: %d]", pts_status);
+                          printf("\n---------------------------------------------------\n");
+                          printf("\n>> Vida[MAX %d] \n[-%d PST]: ", max_vida, vida);
+                          fgets(validacao, TAM_STRING, stdin);
+                          __fpurge(stdin);
+                          validacao[strlen(validacao)-1] = L'\0';
+                            if (verificaNumero(validacao) == -1) {
+                              printf("\n>> Número Inválido! Tente novamente...\n");
+                              loop = 1;
+                            }
+                              else if ((pts_status - (atoi(validacao) * vida)) < 0) {
+                                printf("\n>> Você não tem Pontos de Status suficientes para essa alteração! Tente novamente...\n");
+                                loop = 1;
+                              }
+                                else if ((atoi(validacao) + p[posi[aux]].vida) <= max_vida) {
+                                  if (atoi(validacao) != 0) {
+                                    printf("\n[GASTO: %d PST]", atoi(validacao)*vida);
+                                    printf("\n>> Confirmar? [S/N]\n");
+                                    scanf("%c", &sim_ou_nao);
+                                    __fpurge(stdin);
+                                    if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                      p[posi[aux]].vida = atoi(validacao) + p[posi[aux]].vida;
+                                      pts_status = pts_status - (p[posi[aux]].vida * vida);
+                                    }
+                                  }
+                                }
+                                    else if (p[posi[aux]].vida == max_vida) {
+                                      printf("\n>> Você atingiu o limite máximo de [VIDA]! Tente alterar outros status...\n");
+                                    }
+                                      else {
+                                      printf("\n>> Você não pode ultrapassar o limite máximo de [VIDA]! Tente novamente...\n");
+                                      loop = 1;
+                                      }
+                        } while (loop);
+                      break;
+                      
+                      case 4:
+                        do {
+                          loop = 0;
+                          printf("\n---------------------------------------------------\n");
+                          printf("[PONTOS DE STATUS: %d]", pts_status);
+                          printf("\n---------------------------------------------------\n");
+                          printf("\n>> Velocidade[MAX %d] \n[-%d PST]: ", max_vel, vel);
+                          fgets(validacao, TAM_STRING, stdin);
+                          __fpurge(stdin);
+                          validacao[strlen(validacao)-1] = L'\0';
+                            if (verificaNumero(validacao) == -1) {
+                              printf("\n>> Número Inválido! Tente novamente...\n");
+                              loop = 1;
+                            }
+                              else if ((pts_status - (atoi(validacao) * vel)) < 0) {
+                                printf("\n>> Você não tem Pontos de Status suficientes para essa alteração! Tente novamente...\n");
+                                loop = 1;
+                              }
+                                else if ((atoi(validacao) + p[posi[aux]].velocidade) <= max_vel) {
+                                  if (atoi(validacao) != 0) {
+                                    printf("\n[GASTO: %d PST]", atoi(validacao)*vel);
+                                    printf("\n>> Confirmar? [S/N]\n");
+                                    scanf("%c", &sim_ou_nao);
+                                    __fpurge(stdin);
+                                    if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                      p[posi[aux]].velocidade = atoi(validacao) + p[posi[aux]].velocidade;
+                                      pts_status = pts_status - (p[posi[aux]].velocidade * vel);
+                                    }
+                                  }
+                                }
+                                    else if (p[posi[aux]].velocidade == max_vel) {
+                                      printf("\n>> Você atingiu o limite máximo de [VELOCIDADE]! Tente alterar outros status...\n");
+                                    }
+                                      else {
+                                      printf("\n>> Você não pode ultrapassar o limite máximo de [VELOCIDADE]! Tente novamente...\n");
+                                      loop = 1;
+                                      }
+                        } while (loop);
+                      break;
+                                    
+                      case 5:
+                        do {
+                          loop = 0;
+                          printf("\n---------------------------------------------------\n");
+                          printf("[PONTOS DE STATUS: %d]", pts_status);
+                          printf("\n---------------------------------------------------\n");
+                          printf("\n>> Crítico[MAX %d] \n[-%d PST]: ", max_cri, cri);
+                          fgets(validacao, TAM_STRING, stdin);
+                          __fpurge(stdin);
+                          validacao[strlen(validacao)-1] = L'\0';
+                            if (verificaNumero(validacao) == -1) {
+                              printf("\n>> Número Inválido! Tente novamente...\n");
+                              loop = 1;
+                            }
+                              else if ((pts_status - (atoi(validacao) * cri)) < 0) {
+                                printf("\n>> Você não tem Pontos de Status suficientes para essa alteração! Tente novamente...\n");
+                                loop = 1;
+                              }
+                                else if ((atoi(validacao) + p[posi[aux]].critico) <= max_cri) {
+                                  if (atoi(validacao) != 0) {
+                                    printf("\n[GASTO: %d PST]", atoi(validacao)*cri);
+                                    printf("\n>> Confirmar? [S/N]\n");
+                                    scanf("%c", &sim_ou_nao);
+                                    __fpurge(stdin);
+                                    if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                      p[posi[aux]].critico = atoi(validacao) + p[posi[aux]].critico;
+                                      pts_status = pts_status - (p[posi[aux]].critico * cri);
+                                    }
+                                  }
+                                }
+                                    else if (p[posi[aux]].critico == max_cri) {
+                                      printf("\n>> Você atingiu o limite máximo de [CRÍTICO]! Tente alterar outros status...\n");
+                                    }
+                                      else {
+                                      printf("\n>> Você não pode ultrapassar o limite máximo de [CRÍTICO]! Tente novamente...\n");
+                                      loop = 1;
+                                      }
+                        } while (loop);
+                      break; 
+          
+                      case 6:
+                        do {
+                          loop = 0;
+                          printf("\n---------------------------------------------------\n");
+                          printf("[PONTOS DE STATUS: %d]", pts_status);
+                          printf("\n---------------------------------------------------\n");
+                          printf("\n>> Dano Crítico[MAX %d] \n[-%d PST]: ", max_dano, dano);
+                          fgets(validacao, TAM_STRING, stdin);
+                          __fpurge(stdin);
+                          validacao[strlen(validacao)-1] = L'\0';
+                            if (verificaNumero(validacao) == -1) {
+                              printf("\n>> Número Inválido! Tente novamente...\n");
+                              loop = 1;
+                            }
+                              else if ((pts_status - (atoi(validacao) * dano)) < 0) {
+                                printf("\n>> Você não tem Pontos de Status suficientes para essa alteração! Tente novamente...\n");
+                                loop = 1;
+                              }
+                                else if ((atoi(validacao) + p[posi[aux]].dano_critico) <= max_dano) {
+                                  if (atoi(validacao) != 0) {
+                                    printf("\n[GASTO: %d PST]", atoi(validacao)*dano);
+                                    printf("\n>> Confirmar? [S/N]\n");
+                                    scanf("%c", &sim_ou_nao);
+                                    __fpurge(stdin);
+                                    if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                      p[posi[aux]].dano_critico = atoi(validacao) + p[posi[aux]].dano_critico;
+                                      pts_status = pts_status - (p[posi[aux]].dano_critico * dano);
+                                    }
+                                  }
+                                }
+                                    else if (p[posi[aux]].dano_critico == max_dano) {
+                                      printf("\n>> Você atingiu o limite máximo de [DANO CRÍTICO]! Tente alterar outros status...\n");
+                                    }
+                                      else {
+                                      printf("\n>> Você não pode ultrapassar o limite máximo de [DANO CRÍTICO]! Tente novamente...\n");
+                                      loop = 1;
+                                      }
+                        } while (loop);
+                      break;
+                        
+                      case 7:
+                        do {
+                          loop = 0;
+                          printf("\n---------------------------------------------------\n");
+                          printf("[PONTOS DE STATUS: %d]", pts_status);
+                          printf("\n---------------------------------------------------\n");
+                          printf("\n>> Eficácia[MAX %d] \n[-%d PST]: ", max_efic, efic);
+                          fgets(validacao, TAM_STRING, stdin);
+                          __fpurge(stdin);
+                          validacao[strlen(validacao)-1] = L'\0';
+                            if (verificaNumero(validacao) == -1) {
+                              printf("\n>> Número Inválido! Tente novamente...\n");
+                              loop = 1;
+                            }
+                              else if ((pts_status - (atoi(validacao) * efic)) < 0) {
+                                printf("\n>> Você não tem Pontos de Status suficientes para essa alteração! Tente novamente...\n");
+                                loop = 1;
+                              }
+                                else if ((atoi(validacao) + p[posi[aux]].eficacia) <= max_efic) {
+                                  if (atoi(validacao) != 0) {
+                                    printf("\n[GASTO: %d PST]", atoi(validacao)*efic);
+                                    printf("\n>> Confirmar? [S/N]\n");
+                                    scanf("%c", &sim_ou_nao);
+                                    __fpurge(stdin);
+                                    if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                      p[posi[aux]].eficacia = atoi(validacao) + p[posi[aux]].eficacia;
+                                      pts_status = pts_status - (p[posi[aux]].eficacia * efic);
+                                    }
+                                  }
+                                }
+                                    else if (p[posi[aux]].eficacia == max_efic) {
+                                      printf("\n>> Você atingiu o limite máximo de [EFICÁCIA]! Tente alterar outros status...\n");
+                                    }
+                                      else {
+                                        printf("\n>> Você não pode ultrapassar o limite máximo de [EFICÁCIA]! Tente novamente...\n");
+                                        loop = 1;
+                                      }
+                        } while (loop);
+                      break;
+          
+                      case 8:
+                        do {
+                          loop = 0;
+                          printf("\n---------------------------------------------------\n");
+                          printf("[PONTOS DE STATUS: %d]", pts_status);
+                          printf("\n---------------------------------------------------\n");
+                          printf("\n>> Resistência[MAX %d] \n[-%d PST]: ", max_resi, resi);
+                          fgets(validacao, TAM_STRING, stdin);
+                          __fpurge(stdin);
+                          validacao[strlen(validacao)-1] = L'\0';
+                            if (verificaNumero(validacao) == -1) {
+                              printf("\n>> Número Inválido! Tente novamente...\n");
+                              loop = 1;
+                            }
+                              else if ((pts_status - (atoi(validacao) * resi)) < 0) {
+                                printf("\n>> Você não tem Pontos de Status suficientes para essa alteração! Tente novamente...\n");
+                                loop = 1;
+                              }
+                                else if ((atoi(validacao) + p[posi[aux]].resistencia) <= max_resi) {
+                                  if (atoi(validacao) != 0) {
+                                    printf("\n[GASTO: %d PST]", atoi(validacao)*resi);
+                                    printf("\n>> Confirmar? [S/N]\n");
+                                    scanf("%c", &sim_ou_nao);
+                                    __fpurge(stdin);
+                                    if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                      p[posi[aux]].resistencia = atoi(validacao) + p[posi[aux]].resistencia;
+                                      pts_status = pts_status - (p[posi[aux]].resistencia * resi);
+                                    }
+                                  }
+                                }
+                                    else if (p[posi[aux]].resistencia == max_resi) {
+                                      printf("\n>> Você atingiu o limite máximo de [RESISTÊNCIA]! Tente alterar outros status...\n");
+                                    }
+                                      else {
+                                        printf("\n>> Você não pode ultrapassar o limite máximo de [RESISTÊNCIA]! Tente novamente...\n");
+                                        loop = 1;
+                                      }
+                        } while (loop);
+                      break;  
+                      
+                      case 0:
+                        printf("\nTEM CERTEZA QUE DESEJA CANCELAR A ALTERAÇÃO? [S/N]");
+                        printf("\n>> Opção: ");
+                        scanf("%c", &sim_ou_nao);
+                        __fpurge(stdin);
+                        if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                          printf("\nAlteração cancelada!\n");
+                          p[posi[aux]].ataque = 0;
+                          p[posi[aux]].defesa = 0;
+                          p[posi[aux]].vida = 0;
+                          p[posi[aux]].velocidade = 0;
+                          p[posi[aux]].critico = 0;
+                          p[posi[aux]].dano_critico = 0;
+                          p[posi[aux]].eficacia = 0;
+                          p[posi[aux]].resistencia = 0;
+                          loop_ext = 0;
+                          loop_ext_aux = 1;  
+                        }
+                      break;
+                    }
+                  }
+                    else {
+                      printf("\n[Você não tem mais Pontos de Status!]\n");
+                      loop_ext = 0;
+                    }
+                    
+              } while (loop_ext);
+              aux--;
+            }
+          } while (loop_ext_aux);
+        }
+          else
+            printf("\n[*NÃO HÁ PERSONAGENS CADASTRADOS!* \nPRIMEIRO CADASTRE UM PERSONAGEM...]\n");
+      break;
+
+      
+      case 3:
+        if (cont_p > 0) {
+          do {
+            __fpurge(stdin);
+            escolha = 0;
+            loop_ext_aux = 0;
+            do {
+                __fpurge(stdin);
+                for (i = 0; i < MAX_HAB; i++) {
+                  repetido_h[i] = -1;
+                }
+              aux = 0;
+              aux_ext = 0;
+              loop = 1;
+              printf("\n>>--< *MODIFICAÇÃO DE HABILIDADES* >--<<\n");
+              printf("\n------------ MENU DE BUSCA ------------\n");
+              printf("\n>> Para buscar personagem você pode usar: ");
+              printf("\n[Nome] [Elemento] [Classe] [Signo]");
+              printf("\n[PARA VOLTAR AO MENU DIGITE VOLTAR[0]]");
+              printf("\n\n-----------------------------------------\n");
+              printf("\n>> Busca: ");
+              fgets(validacao, TAM_STRING, stdin);
+              __fpurge(stdin);
+              validacao[strlen(validacao)-1] = L'\0';
+                for (i = 0; i < MAX_PERS; i++) {
+                  if (strcasestr(validacao, p[i].nome) != NULL || 
+                    strcasestr(validacao, p[i].elemento) != NULL || 
+                    strcasestr(validacao, p[i].classe) != NULL || 
+                    strcasestr(validacao, p[i].signo) != NULL) {
+                    aux++;
+                    posi[aux] = i;
+                    loop = 0;
+                    }
+                  }
+
+                if (loop == 1 && strcasestr(validacao, "volta") == NULL && strcasestr(validacao, "0") == NULL)
+                  printf("\n>> Opção Inválida! Tente novamente...\n");
+                    else 
+                      loop = 0;
+                if (repetido_p[posi[aux]] == 1) {
+                  printf("\n>> Você já modifcou adcionou as habilidades de: [%s]!\n Tente buscar uma habilidade diferente...\n", p[posi[aux]].nome);
+                  loop = 1;
+                }
+                  
+            } while (loop);
+            
+            while (aux != 0) {
+              pts_status = pst_qtd;
+              do {
+                __fpurge(stdin);
+                if (cont_h[posi[aux]] == 3) {
+                  printf("\n>> Você atingiu o limite máximo de [HABILIDADES]! Voltando ao menu de busca...\n");
+                  repetido_p[posi[aux]] = 1;
+                  aux--;
+                  loop_ext = 0;
+                  loop_ext_aux = 1;
+                    for (i = 0; i < MAX_PERS; i++) {
+                      cont_h[i] = 0;
+                    }
+                }
+                  else {
+                      do {
+                        __fpurge(stdin);
+                        printf("\n---------------------------------------------------");
+                        printf("\n*[Personagem encontrado: >> %s <<]*", p[posi[aux]].nome);
+                        printf("\n---------------------------------------------------");
+                        aux_ext = 0;
+                        loop = 1;
+                        escolha = 0;
+                        printf("\nHabilidades: ");
+                          for (i = 0; i < MAX_HAB; i++) {
+                            printf("\n[%d] %s", i+1, p[posi[aux]].h[i].nome);
+                          }
+                        printf("\n[0] CANCELAR ALTERAÇÕES");
+                        printf("\n---------------------------------------------------");
+                        printf("\n\n>> Digite a habilidade desejada: ");
+                        fgets(validacao, TAM_STRING, stdin);
+                        __fpurge(stdin);
+                        validacao[strlen(validacao)-1] = L'\0';
+                        
+                          for (i = 0; i < MAX_HAB; i++) {
+                            if (strcasestr(validacao, p[posi[aux]].h[i].nome) != NULL) {
+                              aux_ext++;
+                              posi_ext[aux_ext] = i;
+                              loop = 0;
+                              }
+                            }
+        
+                          if (loop == 1 && atoi(validacao) < 0 || atoi(validacao) > MAX_HAB)
+                            printf("\n>> Opção Inválida! Tente novamente...\n");
+                              else if (atoi(validacao) > 0 && atoi(validacao) <= MAX_HAB) {
+                                aux_ext++;
+                                posi_ext[aux_ext] = atoi(validacao) - 1;
+                                loop = 0;
+                              }
+                                else if (strcasestr(validacao, "0") != NULL || strcasestr(validacao, "canc") != NULL) {
+                                  printf("\n>> TEM CERTEZA QUE DESEJA CANCELAR AS ALTERAÇÕES? [S/N]");
+                                  printf("\n>> Opção: ");
+                                  scanf("%c", &sim_ou_nao);
+                                  __fpurge(stdin);
+                                    if (sim_ou_nao == 's' || sim_ou_nao == 'S') {
+                                      loop = 0;
+                                      loop_ext = 0;
+                                      loop_ext_aux = 1;
+                                        for (i = 0; i < MAX_BUFF; i++) {
+                                          p[posi[aux]].h[posi_ext[aux_ext]].b[0].buff_vet[i] = 0;
+                                          p[posi[aux]].h[posi_ext[aux_ext]].b[0].c_b[0].cooldown_b[i] = 0;
+                                        }
+                                          for (i = 0; i < MAX_DEBUFF; i++) {
+                                            p[posi[aux]].h[posi_ext[aux_ext]].b[0].debuff_vet[i] = 0;
+                                            p[posi[aux]].h[posi_ext[aux_ext]].b[0].c_b[0].cooldown_d[i] = 0;
+                                          }
+                                            for (i = 0; i < MAX_PERS; i++) {
+                                              cont_h[i] = 0;
+                                            }
+                                    }
+                                }         
+                
+                      } while (loop);
+
+                    if (repetido_h[posi_ext[aux_ext]] == posi_ext[aux_ext]) {
+                      printf("\n>> Essa habilidade já foi selecionada! Tente selecionar uma habilidade diferente...\n");
+                      loop_ext = 1;
+                    }
+                      else {
+                        while (aux_ext != 0) {
+                          pts_habilidade = phb_qtd;
+                          do {
+                            loop_aux = 1;
+                            if (pts_habilidade == 0) {
+                              printf("\n\n*Todos os pontos de habilidade já foram utilizados!* \nVoltando ao menu de escolha de habilidade...\n");
+                              repetido_h[posi_ext[aux_ext]] = posi_ext[aux_ext];
+                              cont_h[posi[aux]]++;
+                              loop_aux = 0;
+                              loop_ext = 1;
+                            }
+                              else {
+                                do {
+                                  loop = 1;
+                                  escolha = 0;
+                                  printf("\n---------------------------------------------------\n");
+                                  printf("Pontos de Habilidade: [%d]", pts_habilidade);
+                                  printf("\n---------------------------------------------------\n");
+                                  printf("*[Habilidade encontrada: >> %s <<]*", p[posi[aux]].h[posi_ext[aux_ext]].nome);
+                                  printf("\n---------------------------------------------------");
+                                  printf("\nREFORÇOS: ");
+                                    for (i = 0; i < MAX_BUFF; i++) {
+                                      if (p[posi[aux]].h[posi_ext[aux_ext]].b[0].buff_vet[i] == 1) {
+                                        printf("\n[%s]", buffs[i]);
+                                        printf("[%d]", p[posi[aux]].h[posi_ext[aux_ext]].b[0].c_b[0].cooldown_b[i]);
+                                      }
+                                    }
+                                  printf("\n---------------------------------------------------");
+                                  printf("\nPENALIDADES: ");
+                                    for (i = 0; i < MAX_DEBUFF; i++) {
+                                      if (p[posi[aux]].h[posi_ext[aux_ext]].b[0].debuff_vet[i] == 1) {
+                                        printf("\n[%s]", debuffs[i]);
+                                        printf("[%d]", p[posi[aux]].h[posi_ext[aux_ext]].b[0].c_b[0].cooldown_d[i]);
+                                      }
+                                    }
+                                  printf("\n---------------------------------------------------");
+                                  printf("\nMODIFICADORES: ");
+                                    for (i = 0; i < MAX_HAB_MOD; i++) {
+                                      if (p[posi[aux]].h[posi_ext[aux_ext]].mod[i] == 1) {
+                                        printf("\n[%s]", habilidade_mod[i]);
+                                      }
+                                    }
+                                  printf("\n---------------------------------------------------");
+                                  printf("\nDigite o que você deseja adcionar a habilidade: ");
+                                  printf("\n[1] Reforço");
+                                  printf("\n[2] Penalidade");
+                                  printf("\n[3] Modificadores");
+                                  printf("\n[0] CANCELAR ALTERAÇÕES");
+                                  printf("\n---------------------------------------------------");
+                                  printf("\n\n>> Opção: ");
+                                  fgets(validacao, TAM_STRING, stdin);
+                                  __fpurge(stdin);
+                                  validacao[strlen(validacao)-1] = L'\0';
+                                  
+                                    for (i = 0; i < 2; i++) {
+                                      if (strcasestr(validacao, menu_habi[i]) != NULL) {
+                                        escolha = i + 1;
+                                        loop = 0;
+                                      }
+                                    }
+                                      if (loop == 1 && atoi(validacao) > 0 && atoi(validacao) <= 3) {
+                                        escolha = atoi(validacao);
+                                        loop = 0;
+                                      }
+                                        else if (strcasestr(validacao, "0") != NULL || strcasestr(validacao, "canc") != NULL) {
+                                          printf("\n>> TEM CERTEZA QUE DESEJA CANCELAR AS ALTERAÇÕES? [S/N]");
+                                          printf("\n>> Opção: ");
+                                          scanf("%c", &sim_ou_nao);
+                                          __fpurge(stdin);
+                                            if (sim_ou_nao == 's' || sim_ou_nao == 'S') {
+                                              loop = 0;
+                                              loop_aux = 0;
+                                              loop_ext = 1;
+                                                for (i = 0; i < MAX_BUFF; i++) {
+                                                  p[posi[aux]].h[posi_ext[aux_ext]].b[0].buff_vet[i] = 0;
+                                                  p[posi[aux]].h[posi_ext[aux_ext]].b[0].c_b[0].cooldown_b[i] = 0;
+                                                }
+                                                  for (i = 0; i < MAX_DEBUFF; i++) {
+                                                    p[posi[aux]].h[posi_ext[aux_ext]].b[0].debuff_vet[i] = 0;
+                                                    p[posi[aux]].h[posi_ext[aux_ext]].b[0].c_b[0].cooldown_d[i] = 0;
+                                                  }
+                                                    for (i = 0; i < MAX_HAB_MOD; i++) {
+                                                      p[posi[aux]].h[posi_ext[aux_ext]].mod[i] = 0;
+                                                    }
+                                            }
+                                        }
+                                      if (loop == 1 && sim_ou_nao == 'N' || sim_ou_nao == 'n')
+                                        loop = 0;
+                                        else
+                                          printf("\n>> Opção Inválida! Tente novamente...\n");
+                                } while (loop);
+                              
+                                if (escolha > 0) {
+                                  switch (escolha) {
+                                    case 1: 
+                                      loop = 1;
+                                      do {
+                                        printf("\n---------------------------------------------------");
+                                        printf("\n[Pontos de Habilidade: %d]", pts_habilidade);
+                                        printf("\n---------------------------------------------------");
+                                        printf("\nREFORÇOS: ");
+                                          for (i = 0; i < MAX_BUFF; i++)
+                                            printf("\n[%d] [%s]", i + 1, buffs[i]);
+                                        printf("\n---------------------------------------------------\n");
+                                        printf("\n>> Opção: ");
+                                        fgets(validacao, TAM_STRING, stdin);
+                                        __fpurge(stdin);
+                                        validacao[strlen(validacao)-1] = L'\0';
+          
+                                          if (atoi(validacao) == 0) {
+                                            for (i = 0; i < MAX_BUFF; i++) {
+                                              if (strcasestr(validacao, buffs[i]) != NULL 
+                                                && p[posi[aux]].h[posi_ext[aux_ext]].b[0].buff_vet[i] == 0) {
+                                                printf("\n>> Você deseja adcionar o reforço de: %s? [S/N]", buffs[i]);
+                                                printf("\n>> Opção: ");
+                                                scanf("%c", &sim_ou_nao);
+                                                __fpurge(stdin);
+                                                if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                                  p[posi[aux]].h[posi_ext[aux_ext]].b[0].buff_vet[i] = 1;
+                                                  printf("\n*Você adcionou o reforço de: [%s] com sucesso!*", buffs[i-1]);
+                                                  posi_valid = i;
+                                                  loop = 0;
+                                                }
+                                              }
+                                            }
+                                          }
+                                            else if (atoi(validacao) > 0 && atoi(validacao) <= MAX_BUFF 
+                                              && p[posi[aux]].h[posi_ext[aux_ext]].b[0].buff_vet[atoi(validacao)-1] == 0) {
+                                              printf("\n>> Você deseja adcionar o reforço de: [%s]? [S/N]", buffs[atoi(validacao)-1]);
+                                              printf("\n>> Opção: ");
+                                              scanf("%c", &sim_ou_nao);
+                                              __fpurge(stdin);
+                                              if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                                p[posi[aux]].h[posi_ext[aux_ext]].b[0].buff_vet[atoi(validacao)-1] = 1;
+                                                printf("\n*Você adcionou o reforço de: [%s] com sucesso!*", buffs[atoi(validacao)-1]);
+                                                posi_valid = atoi(validacao);
+                                                loop = 0;
+                                              }
+                                            }
+                                          if (loop == 1 && sim_ou_nao == 'N' || sim_ou_nao == 'n')
+                                            loop = 0;
+                                            else if (loop == 1 && (p[posi[aux]].h[posi_ext[aux_ext]].b[0].buff_vet[atoi(validacao)-1] == 1 
+                                              || p[posi[aux]].h[posi_ext[aux_ext]].b[0].buff_vet[posi_valid] == 1))
+                                              printf("\n>> Você já adcionou o buff de: [%s]! Tente adcionar outra penalidade...\n", debuffs[atoi(validacao)-1]);
+                                              else if (loop == 1)
+                                                printf("\n>> Opção Inválida! Tente novamente...\n");
+          
+                                        if (loop == 0) {
+                                          do {
+                                            loop = 1;
+                                            printf("\n\n>> Qual será o cooldown do reforço? [-1PHB*cooldown] [1 - 3]");
+                                            printf("\n>> Opção: ");
+                                            fgets(validacao, TAM_STRING, stdin);
+                                            __fpurge(stdin);
+                                            validacao[strlen(validacao)-1] = L'\0';
+                                            if (atoi(validacao) > 0 && atoi(validacao) <= 3 && pts_habilidade-1*atoi(validacao) >= 0) {
+                                              p[posi[aux]].h[posi_ext[aux_ext]].b[0].c_b[0].cooldown_b[posi_valid-1] = atoi(validacao);
+                                              pts_habilidade = pts_habilidade-1*atoi(validacao);
+                                              loop = 0;
+                                            }
+                                              else {
+                                                if (pts_habilidade-1*atoi(validacao) < 0)
+                                                printf("\n>> Você não tem pontos de habilidade suficientes para essa ação! Tente novamente...\n");
+                                                  else
+                                                    printf("\n>> Opção Inválida! Tente novamente...\n");
+                                              }
+                                          } while (loop);
+                                        }
+                                        
+                                      } while (loop);
+                                    break; 
+          
+                                    case 2:
+                                      loop = 1;
+                                      do {
+                                        printf("\n---------------------------------------------------");
+                                        printf("\n[Pontos de Habilidade: %d]", pts_habilidade);
+                                        printf("\n---------------------------------------------------");
+                                        printf("\nPERNALIDADES: ");
+                                          for (i = 0; i < MAX_DEBUFF; i++)
+                                            printf("\n[%d] [%s]", i + 1, debuffs[i]);
+                                        printf("\n---------------------------------------------------\n");
+                                        printf("\n>> Opção: ");
+                                        fgets(validacao, TAM_STRING, stdin);
+                                        __fpurge(stdin);
+                                        validacao[strlen(validacao)-1] = L'\0';
+          
+                                          if (atoi(validacao) == 0) {
+                                            for (i = 0; i < MAX_DEBUFF; i++) {
+                                              if (strcasestr(validacao, debuffs[i]) != NULL 
+                                                && p[posi[aux]].h[posi_ext[aux_ext]].b[0].debuff_vet[i] == 0) {
+                                                printf("\n>> Você deseja adcionar a penalidade de: [%s?] [S/N]", debuffs[i]);
+                                                printf("\n>> Opção: ");
+                                                scanf("%c", &sim_ou_nao);
+                                                __fpurge(stdin);
+                                                if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                                  p[posi[aux]].h[posi_ext[aux_ext]].b[0].debuff_vet[i] = 1;
+                                                  printf("\n*Você adcionou a penalidade de: [%s] com sucesso!*", debuffs[i-1]);
+                                                  posi_valid = i;
+                                                  loop = 0;
+                                                }
+                                              }
+                                            }
+                                          }
+                                            else if (atoi(validacao) > 0 && atoi(validacao) <= MAX_DEBUFF 
+                                              && p[posi[aux]].h[posi_ext[aux_ext]].b[0].debuff_vet[atoi(validacao)-1] == 0) {
+                                              printf("\n>> Você deseja adcionar a penalidade de: [%s]? [S/N]", debuffs[atoi(validacao)-1]);
+                                              printf("\n>> Opção: ");
+                                              scanf("%c", &sim_ou_nao);
+                                              __fpurge(stdin);
+                                              if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                                p[posi[aux]].h[posi_ext[aux_ext]].b[0].debuff_vet[atoi(validacao)-1] = 1;
+                                                printf("\n*Você adcionou a penalidade de: [%s] com sucesso!*", debuffs[atoi(validacao)-1]);
+                                                posi_valid = atoi(validacao);
+                                                loop = 0;
+                                              }
+                                            }
+                                          if (loop == 1 && sim_ou_nao == 'N' || sim_ou_nao == 'n')
+                                            loop = 0;
+                                            else if (loop == 1 && (p[posi[aux]].h[posi_ext[aux_ext]].b[0].debuff_vet[atoi(validacao)-1] == 1 
+                                              || p[posi[aux]].h[posi_ext[aux_ext]].b[0].debuff_vet[posi_valid] == 1))
+                                              printf("\n>> Você já adcionou a penalidade de: [%s]! Tente adcionar outra penalidade...\n", debuffs[atoi(validacao)-1]);
+                                              else if (loop == 1)
+                                                printf("\n>> Opção Inválida! Tente novamente...\n");
+                                        
+                                          if (loop == 0) {
+                                            do {
+                                              loop = 1;
+                                              printf("\n>> Qual será o cooldown da penalidade? [-1PHB*cooldown] [1 - 3]");
+                                              printf("\n>> Opção: ");
+                                              fgets(validacao, TAM_STRING, stdin);
+                                              __fpurge(stdin);
+                                              validacao[strlen(validacao)-1] = L'\0';
+                                              if (atoi(validacao) > 0 && atoi(validacao) <= 3 && pts_habilidade-1*atoi(validacao) >= 0) {
+                                                p[posi[aux]].h[posi_ext[aux_ext]].b[0].c_b[0].cooldown_d[posi_valid-1] = atoi(validacao);
+              
+                                                loop = 0;
+                                                pts_habilidade = pts_habilidade-1*atoi(validacao);
+                                              }
+                                                else {
+                                                  if (pts_habilidade-1*atoi(validacao) < 0)
+                                                  printf("\n>> Você não tem pontos de habilidade suficientes para essa ação! Tente novamente...\n");
+                                                    else
+                                                      printf("\n>> Opção Inválida! Tente novamente...\n");
+                                                }
+                                            } while (loop);
+                                          }
+                                      } while (loop);
+                                    break;
+        
+                                    case 3:
+                                      loop = 1;
+                                      do {
+                                        printf("\n---------------------------------------------------");
+                                        printf("\n[Pontos de Habilidade: %d]", pts_habilidade);
+                                        printf("\n---------------------------------------------------");
+                                        printf("\nMODIFICADORES: ");
+                                          for (i = 0; i < MAX_HAB_MOD; i++)
+                                            printf("\n[%d] [%s]", i + 1, habilidade_mod[i]);
+                                        printf("\n---------------------------------------------------\n");
+                                        printf("\n>> Opção: ");
+                                        fgets(validacao, TAM_STRING, stdin);
+                                        __fpurge(stdin);
+                                        validacao[strlen(validacao)-1] = L'\0';
+        
+                                          if (atoi(validacao) == 0) {
+                                            for (i = 0; i < MAX_HAB_MOD; i++) {
+                                              if (strcasestr(validacao, habilidade_mod[i]) != NULL 
+                                                && p[posi[aux]].h[posi_ext[aux_ext]].b[0].debuff_vet[i] == 0) {
+                                                printf("\n>> Você deseja adcionar o modificador de: [%s?] [S/N]", habilidade_mod[i]);
+                                                printf("\n>> Opção: ");
+                                                scanf("%c", &sim_ou_nao);
+                                                __fpurge(stdin);
+                                                if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                                  p[posi[aux]].h[posi_ext[aux_ext]].mod[i] = 1;
+                                                  printf("\n*Você adcionou o modificador de: [%s] com sucesso!*", habilidade_mod[i-1]);
+                                                  posi_valid = i;
+                                                  loop = 0;
+                                                }
+                                              }
+                                            }
+                                          }
+                                            else if (atoi(validacao) > 0 && atoi(validacao) <= MAX_HAB_MOD 
+                                              && p[posi[aux]].h[posi_ext[aux_ext]].mod[atoi(validacao)-1] == 0) {
+                                              printf("\n>> Você deseja adcionar o modificador de: [%s]? [-1PHB] [S/N]", habilidade_mod[atoi(validacao)-1]);
+                                              printf("\n>> Opção: ");
+                                              scanf("%c", &sim_ou_nao);
+                                              __fpurge(stdin);
+                                              if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                                                p[posi[aux]].h[posi_ext[aux_ext]].mod[atoi(validacao)-1] = 1;
+                                                printf("\n*Você adcionou o modificador de: [%s] com sucesso!*", habilidade_mod[atoi(validacao)-1]);
+                                                pts_habilidade--;
+                                                posi_valid = atoi(validacao);
+                                                loop = 0;
+                                              }
+                                            }
+                                          if (loop == 1 && sim_ou_nao == 'N' || sim_ou_nao == 'n')
+                                            loop = 0;
+                                            else if (loop == 1 && (p[posi[aux]].h[posi_ext[aux_ext]].mod[atoi(validacao)-1] == 1 
+                                              || p[posi[aux]].h[posi_ext[aux_ext]].mod[posi_valid] == 1))
+                                              printf("\n>> Você já adcionou o modificador de: [%s]! Tente adcionar outro modificador...\n", habilidade_mod[atoi(validacao)-1]);
+                                              else if (loop == 1)
+                                                printf("\n>> Opção Inválida! Tente novamente...\n");
+                                      } while (loop);
+                                    break;
+                                    
+                                  }
+                                }
+                              }
+                          } while (loop_aux);
+                          aux_ext--;
+                        } 
+                      }
+                  }
+              } while (loop_ext);
+            }
+            
+          } while (loop_ext_aux);
+        }
+          else
+            printf("\n[*NÃO HÁ PERSONAGENS CADASTRADOS!* \nPRIMEIRO CADASTRE UM PERSONAGEM...]\n");
+      break;
+
+      case 4: 
+        if (cont_p > 0) {
+          do {
+            loop_ext_aux = 1;
+            do {
+              __fpurge(stdin);
+              system("clear");
+              aux = 0;
+              loop = 1;
+              printf("\n------------< MENU DE BUSCA >------------\n");
+              printf("\n>> Para buscar o personagem você pode usar: ");
+              printf("\n[Nome] [Elemento] [Classe] [Signo]");
+              printf("\n[PARA MOSTRAR TODOS OS PERSONAGENS DIGITE TUDO[1]] ");
+              printf("\n[PARA VOLTAR AO MENU DIGITE VOLTAR[0]]");
+              printf("\n\n-----------------------------------------\n");
+              printf("\n>> Busca: ");
+              fgets(validacao, TAM_STRING, stdin);
+              __fpurge(stdin);
+              validacao[strlen(validacao)-1] = L'\0';
+
+                for (i = 0; i < MAX_PERS; i++) {
+                  if (strcasestr(validacao, p[i].nome) != NULL || 
+                    strcasestr(validacao, p[i].elemento) != NULL || 
+                    strcasestr(validacao, p[i].classe) != NULL || 
+                    strcasestr(validacao, p[i].signo) != NULL) {
+                    aux++;
+                    posi[aux] = i;
+                    loop = 0;
+                    }
+                  }
+
+                if (loop == 1 && strcasestr(validacao, "volta") != NULL || strcasestr(validacao, "0") != NULL) {
+                  loop = 0;
+                  loop_ext_aux = 0;
+                }
+                  else if (strcasestr(validacao, "tudo") != NULL || strcasestr(validacao, "1") != NULL) {
+                      for (i = 0; i < cont_p; i++) {
+                        aux++;
+                        posi[aux] = i;
+                      }
+                      loop = 0;
+                    }
+                      if (loop == 1) {
+                        printf("\n>> Opção Inválida! Tente novamente...\n");
+                        printf("\nAperte ENTER para continuar...");
+                        getchar();
+                        __fpurge(stdin);
+                      }
+            } while (loop);
+
+            while (aux != 0) {
+              printf("\n---------------------------------------------------");
+              printf("\n*[Personagem encontrado: >> %s <<]*", p[posi[aux]].nome);
+              printf("\n---------------------------------------------------");
+              printf("\n[{STATUS}]");
+              printf("\n---------------------------------------------------");
+              printf("\nATK: %d", p[posi[aux]].ataque);
+              printf("\nDEF: %d", p[posi[aux]].defesa);
+              printf("\nHP: %d", p[posi[aux]].vida);
+              printf("\nVEL: %d", p[posi[aux]].velocidade);
+              printf("\nCRIT: %d", p[posi[aux]].critico);
+              printf("\nDANO CRIT: %d", p[posi[aux]].dano_critico);
+              printf("\nEFIC: %d", p[posi[aux]].eficacia);
+              printf("\nRESIST: %d", p[posi[aux]].resistencia);
+              printf("\n===================================================");
+                for (i = 0; i < MAX_HAB; i++) {
+                  printf("\nHABILIDADE [%d]: ", i+1);
+                  printf("[%s]", p[posi[aux]].h[i].nome);
+                  printf("\n---------------------------------------------------");
+                  printf("\nREFORÇOS:");
+                  for (j = 0; j < MAX_BUFF; j++) {
+                    if (p[posi[aux]].h[i].b[0].buff_vet[j] == 1) {
+                      printf("\n[%s]", buffs[j]);
+                    }
+                  }
+                  printf("\n---------------------------------------------------");
+                  printf("\nPENALIDADES:");
+                  for (j = 0; j < MAX_DEBUFF; j++) {
+                    if (p[posi[aux]].h[i].b[0].debuff_vet[j] == 1) {
+                      printf("\n[%s]", debuffs[j]);
+                    }
+                  }
+                  printf("\n---------------------------------------------------");
+                  printf("\nMODIFICADORES:");
+                  for (j = 0; j < MAX_BUFF; j++) {
+                    if (p[posi[aux]].h[i].mod[j] == 1) {
+                      printf("\n[%s]", habilidade_mod[j]);
+                    }
+                  }
+                  printf("\n===================================================");
+                }
+              aux--;
+            }
+            if (loop_ext_aux == 1) {
+              printf("\nAperte ENTER para continuar...");
+              getchar();
+              __fpurge(stdin);
+            }
+          } while (loop_ext_aux);
+        }
+          else 
+            printf("\n[*NÃO HÁ PERSONAGENS CADASTRADOS!* \nPRIMEIRO CADASTRE UM PERSONAGEM...]\n");
+      break;
+
+      case 5: 
+        if (cont_p > 0) {
+          do {
+            __fpurge(stdin);
+            system("clear");
+            loop_ext_aux = 1;
+            do {
+              aux = 0;
+              loop = 1;
+              printf("\n-----------< MENU DE EXCLUSÃO >-----------\n");
+              printf("\n------------- MENU DE BUSCA -------------\n");
+              printf("\n>> Para buscar o personagem para exclusão você pode usar: ");
+              printf("\n[Nome] [Elemento] [Classe] [Signo]");
+              printf("\n[PARA EXCLUIR TODOS OS PERSONAGENS DIGITE TUDO[1]] ");
+              printf("\n[PARA VOLTAR AO MENU DIGITE VOLTAR[0]]");
+              printf("\n\n-----------------------------------------\n");
+              printf("\n>> Busca: ");
+              fgets(validacao, TAM_STRING, stdin);
+              __fpurge(stdin);
+              validacao[strlen(validacao)-1] = L'\0';
+
+                for (i = 0; i < cont_p; i++) {
+                  if (strcasestr(validacao, p[i].nome) != NULL || 
+                    strcasestr(validacao, p[i].elemento) != NULL || 
+                    strcasestr(validacao, p[i].classe) != NULL || 
+                    strcasestr(validacao, p[i].signo) != NULL) {
+                    aux++;
+                    posi[aux] = i;
+                    loop = 0;
+                    }
+                  }
+
+                if (loop == 1 && strcasestr(validacao, "volta") != NULL || strcasestr(validacao, "0") != NULL) {
+                  loop = 0;
+                  loop_ext_aux = 0;
+                }
+                  else if (strcasestr(validacao, "tudo") != NULL || strcasestr(validacao, "1") != NULL) {
+                      for (i = 0; i < cont_p; i++) {
+                        aux++;
+                        posi[aux] = i;
+                      }
+                      loop = 0;
+                    }
+                      if (loop == 1) {
+                        printf("\n>> Opção Inválida! Tente novamente...\n");
+                        printf("\nAperte ENTER para continuar...");
+                        getchar();
+                        __fpurge(stdin);
+                      }
+            } while (loop);
+
+            while (aux != 0) {
+              printf("\n---------------------------------------------------");
+              printf("\n*[Personagem encontrado: >> %s <<]*", p[posi[aux]].nome);
+              printf("\n---------------------------------------------------");
+              printf("\n[{STATUS}]");
+              printf("\n---------------------------------------------------");
+              printf("\nATK: %d", p[posi[aux]].ataque);
+              printf("\nDEF: %d", p[posi[aux]].defesa);
+              printf("\nHP: %d", p[posi[aux]].vida);
+              printf("\nVEL: %d", p[posi[aux]].velocidade);
+              printf("\nCRIT: %d", p[posi[aux]].critico);
+              printf("\nDANO CRIT: %d", p[posi[aux]].dano_critico);
+              printf("\nEFIC: %d", p[posi[aux]].eficacia);
+              printf("\nRESIST: %d", p[posi[aux]].resistencia);
+              printf("\n===================================================");
+                for (i = 0; i < MAX_HAB; i++) {
+                  printf("\nHABILIDADE [%d]: ", i+1);
+                  printf("[%s]", p[posi[aux]].h[i].nome);
+                  printf("\n---------------------------------------------------");
+                  printf("\nREFORÇOS:");
+                  for (j = 0; j < MAX_BUFF; j++) {
+                    if (p[posi[aux]].h[i].b[0].buff_vet[j] == 1) {
+                      printf("\n[%s]", buffs[j]);
+                    }
+                  }
+                  printf("\n---------------------------------------------------");
+                  printf("\nPENALIDADES:");
+                  for (j = 0; j < MAX_DEBUFF; j++) {
+                    if (p[posi[aux]].h[i].b[0].debuff_vet[j] == 1) {
+                      printf("\n[%s]", debuffs[j]);
+                    }
+                  }
+                  printf("\n---------------------------------------------------");
+                  printf("\nMODIFICADORES:");
+                  for (j = 0; j < MAX_BUFF; j++) {
+                    if (p[posi[aux]].h[i].mod[j] == 1) {
+                      printf("\n[%s]", habilidade_mod[j]);
+                    }
+                  }
+                  printf("\n===================================================");
+                }
+                  do {
+                    loop = 0;
+                    printf("\n\nTEM CERTEZA QUE DESEJA EXCLUIR: [%s]?", p[posi[aux]].nome);
+                    printf("\n[S/N] >> Opção: ");
+                    scanf("%s", &sim_ou_nao);
+                    __fpurge(stdin);
+                    if (sim_ou_nao == 's' || sim_ou_nao == 'S') {
+                      repetido_p[posi[aux]] = 0;
+                      strcpy(p[posi[aux]].nome, "NULL");
+                      p[posi[aux]].vida = 0;
+                      p[posi[aux]].ataque = 0;
+                      p[posi[aux]].defesa = 0;
+                      p[posi[aux]].velocidade = 0;
+                      p[posi[aux]].critico = 0;
+                      p[posi[aux]].dano_critico = 0;
+                      p[posi[aux]].eficacia = 0;
+                      p[posi[aux]].resistencia = 0;
+                        for (i = 0; i < MAX_HAB; i++) {
+                          strcpy(p[posi[aux]].h[i].nome, "NULL");
+                          for (j = 0; j < MAX_BUFF; j++) {
+                            p[posi[aux]].h[i].b[0].buff_vet[j] = 0;
+                          }
+                            for (j = 0; j < MAX_DEBUFF; j++) {
+                              p[posi[aux]].h[i].b[0].debuff_vet[j] = 0;
+                            }
+                              for (j = 0; j < MAX_BUFF; j++) {
+                                p[posi[aux]].h[i].mod[j] = 0;
+                              }
+                        }
+                      printf("\n[*PERSONAGEM EXCLUIDO COM SUCESSO!*]\n");
+                      cont_p--;
+                    }
+                      else {
+                        if (sim_ou_nao == 'n' || sim_ou_nao == 'N') {
+                          printf("\n[*EXCLUSÃO CANCELADA!*]\n");
+                        }
+                          else {
+                            loop = 1;
+                            printf("\n>> Opção inválida! Tente novamente...");
+                          }
+                      }
+                  } while (loop);
+              
+              aux--;
+            }
+            if (loop_ext_aux == 1) {
+              printf("\nAperte ENTER para continuar...");
+              getchar();
+              __fpurge(stdin);
+            }
+          } while (loop_ext_aux);
+        }
+          else  
+            printf("\n[*NÃO HÁ PERSONAGENS CADASTRADOS!* \nPRIMEIRO CADASTRE UM PERSONAGEM...]\n");
+      break;
+
+      case 6:
+        if (cont_b < MAX_BOT) {
+          printf("\n------------< MENU DE CRIAÇÃO DE BOTS >------------\n");
+          do {
+              loop = 0;
+              printf("\n>> Nome do bot: ");
+              fgets(b[cont_b].nome, TAM_STRING, stdin);
+              __fpurge(stdin);
+              b[cont_b].nome[strlen(b[cont_b].nome)-1] = L'\0';
+                if (nome_valido(b[cont_b].nome) == 0) {
+                  printf("\n>> Nome Inválido! Tente novamente...\n");
+                  loop = 1;
+                }
+              for (i = 0; i < cont_b; i++) {
+                if (strcasecmp(b[cont_b].nome, b[i].nome) == 0) {
+                  printf("\n>> Nome já cadastrado! Tente novamente...\n");
+                  loop = 1;
+                }
+              }
+            } while (loop);
+          printf("\n>> Nome digitado: [%s]\n", b[cont_b].nome);
+
+          do {
+              loop = 1;
+              aux = -1;
+              printf("\nElementos disponíveis: ");
+                for (i = 0; i < MAX_ELEM; i++) 
+                  printf("\n> %d - %s", i + 1, elementos_aux[i]);
+              printf("\n>> Opção: ");
+              fgets(validacao, TAM_STRING, stdin);
+              __fpurge(stdin);
+              validacao[strlen(validacao)-1] = L'\0';
+              aux = atoi(validacao);
+
+              if (isdigit(aux) == 0 && aux > 0 && aux <= MAX_ELEM) {
+                loop = 0;
+                strcpy(b[cont_b].elemento, elementos_aux[aux - 1]);
+              }
+              if (loop == 1) {
+                for (i = 0; i < MAX_ELEM; i++) {
+                  if (strcasestr(validacao, elementos_aux[i]) != NULL) {
+                    loop = 0;
+                    strcpy(b[cont_b].elemento, elementos_aux[i]);
+                  }
+                }
+              }
+              if (loop == 1)
+                printf("\n>> Opção Inválida! Tente novamente...\n");
+            } while (loop);
+          printf("\n>> Elemento selecionado: %s\n", b[cont_b].elemento);
+          
+          do {
+            loop = 0;
+            printf("\n>> Defesa do bot: ");
+            fgets(validacao, TAM_STRING, stdin);
+            __fpurge(stdin);
+            validacao[strlen(validacao)-1] = L'\0';
+              if (verificaNumero(validacao) == -1) {
+                printf("\n>> Número Inválido! Tente novamente...\n");
+                loop = 1;
+              }
+                else
+                  b[cont_b].def = atoi(validacao);
+          } while (loop);
+          printf("\n>> Defesa digitada: [%d]\n", b[cont_b].def);
+
+          do {
+            loop = 0;
+            printf("\n>> [%] Resistência do bot: ");
+            fgets(validacao, TAM_STRING, stdin);
+            __fpurge(stdin);
+            validacao[strlen(validacao)-1] = L'\0';
+              if (verificaNumero(validacao) == -1) {
+                printf("\n>> Número Inválido! Tente novamente...\n");
+                loop = 1;
+              }
+                else
+                  b[cont_b].resi = atoi(validacao);
+          } while (loop);
+          printf("\n>> Resistência digitada: [%d%]\n", b[cont_b].resi);
+
+          do {
+            loop = 0;
+            printf("\n>> [0-99] [%] Redução de dano do bot: ");
+            fgets(validacao, TAM_STRING, stdin);
+            __fpurge(stdin);
+            validacao[strlen(validacao)-1] = L'\0';
+              if (verificaNumero(validacao) == -1) {
+                printf("\n>> Número Inválido! Tente novamente...\n");
+                loop = 1;
+              }
+                else {
+                  b[cont_b].redu = atoi(validacao);
+                  if (b[cont_b].redu > 99) {
+                    printf("\n>> Valor Inválido! Tente novamente...\n");
+                    loop = 1;
+                  }
+                }
+          } while (loop);
+          printf("\n>> Redução de dano digitada: [%d%]\n", b[cont_b].redu);
+          
+          printf("\n---------------------------------------------------");
+          printf("\n[*BOT CRIADO COM SUCESSO!*]\n");
+          cont_b++;
+        }
+          else
+            printf("\n[*NÃO HÁ ESPAÇO PARA MAIS BOTS!*] Voltando ao menu principal...\n");
+      break;
+
+      case 7:
+        if (cont_b > 0) {
+          do {
+            loop_ext_aux = 1;
+            do {
+              __fpurge(stdin);
+              system("clear");
+              aux = 0;
+              loop = 1;
+              printf("\n------------< MENU DE PROCURA DE BOT >------------\n");
+              printf("\n>> Para buscar o bot você pode usar: ");
+              printf("\n[Nome do Bot]");
+              printf("\n[Elemento do Bot]");
+              printf("\n[PARA MOSTRAR TODOS OS BOTS DIGITE TUDO[1]] ");
+              printf("\n[PARA VOLTAR AO MENU DIGITE VOLTAR[0]]");
+              printf("\n\n-----------------------------------------\n");
+              printf("\n>> Busca: ");
+              fgets(validacao, TAM_STRING, stdin);
+              __fpurge(stdin);
+              validacao[strlen(validacao)-1] = L'\0';
+
+                for (i = 0; i < cont_b; i++) {
+                  if (strcasestr(validacao, b[i].nome) != NULL) {
+                    aux++;
+                    posi[aux] = i;
+                    loop = 0;
+                    }
+                  if (strcasestr(validacao, elementos_aux[i]) != NULL) {
+                    aux++;
+                    posi[aux] = i;
+                    loop = 0;
+                    }
+                  }
+
+                if (loop == 1 && strcasestr(validacao, "volta") != NULL || strcasestr(validacao, "0") != NULL) {
+                  loop = 0;
+                  loop_ext_aux = 0;
+                }
+                  else if (strcasestr(validacao, "tudo") != NULL || strcasestr(validacao, "1") != NULL) {
+                      for (i = 0; i < cont_b; i++) {
+                        aux++;
+                        posi[aux] = i;
+                      }
+                      loop = 0;
+                    }
+                      if (loop == 1) {
+                        printf("\n>> Opção Inválida! Tente novamente...\n");
+                        printf("\nAperte ENTER para continuar...");
+                        getchar();
+                        __fpurge(stdin);
+                      }
+            } while (loop);
+
+            while (aux != 0) {
+              printf("\n---------------------------------------------------");
+              printf("\n*[Bot encontrado: >> %s <<]*", b[posi[aux]].nome);
+              printf("\n---------------------------------------------------");
+              printf("\n[{STATUS}]");
+              printf("\n---------------------------------------------------");
+              printf("\nDEFESA: %d", b[posi[aux]].def);
+              printf("\nRESISTÊNCIA: %d", b[posi[aux]].resi);
+              printf("\nREDUÇÃO DE DANO: %d", b[posi[aux]].redu);
+              printf("\n---------------------------------------------------");
+              aux--;
+            }
+            if (loop_ext_aux == 1) {
+              printf("\nAperte ENTER para continuar...");
+              getchar();
+              __fpurge(stdin);
+            }
+          } while (loop_ext_aux);
+        }
+          else 
+            printf("\n[*NÃO HÁ BOTS CADASTRADOS!* \nPRIMEIRO CADASTRE UM BOT...]\n");
+      break;
+
+      case 8:
+        if (cont_b > 0) {
+          do {
+            loop_ext_aux = 1;
+            do {
+              __fpurge(stdin);
+              system("clear");
+              aux = 0;
+              loop = 1;
+              printf("\n------------< MENU DE EXCLUSÃO DE BOT >------------\n");
+              printf("\n------------- MENU DE PROCURA DE BOT -------------\n");
+              printf("\n>> Para buscar o bot você pode usar: ");
+              printf("\n[Nome do Bot]");
+              printf("\n[PARA MOSTRAR TODOS OS BOTS DIGITE TUDO[1]] ");
+              printf("\n[PARA VOLTAR AO MENU DIGITE VOLTAR[0]]");
+              printf("\n\n-----------------------------------------\n");
+              printf("\n>> Busca: ");
+              fgets(validacao, TAM_STRING, stdin);
+              __fpurge(stdin);
+              validacao[strlen(validacao)-1] = L'\0';
+
+                for (i = 0; i < cont_b; i++) {
+                  if (strcasestr(validacao, b[i].nome) != NULL) {
+                    aux++;
+                    posi[aux] = i;
+                    loop = 0;
+                    }
+                  }
+
+                if (loop == 1 && strcasestr(validacao, "volta") != NULL || strcasestr(validacao, "0") != NULL) {
+                  loop = 0;
+                  loop_ext_aux = 0;
+                }
+                  else if (strcasestr(validacao, "tudo") != NULL || strcasestr(validacao, "1") != NULL) {
+                      for (i = 0; i < cont_b; i++) {
+                        aux++;
+                        posi[aux] = i;
+                      }
+                      loop = 0;
+                    }
+                      if (loop == 1) {
+                        printf("\n>> Opção Inválida! Tente novamente...\n");
+                        printf("\nAperte ENTER para continuar...");
+                        getchar();
+                        __fpurge(stdin);
+                      }
+            } while (loop);
+
+            while (aux != 0) {
+              printf("\n---------------------------------------------------");
+              printf("\n*[Bot encontrado: >> %s <<]*", b[posi[aux]].nome);
+              printf("\n---------------------------------------------------");
+              printf("\n[{STATUS}]");
+              printf("\n---------------------------------------------------");
+              printf("\n[DEF: %d]", b[posi[aux]].def);
+              printf("\n[RESIST: %d]", b[posi[aux]].resi);
+              printf("\n[REDUÇÃO DE DANO: %d]", b[posi[aux]].redu);
+              printf("\n---------------------------------------------------");
+                do {
+                  loop = 0;
+                  printf("\n\nTEM CERTEZA QUE DESEJA EXCLUIR: [%s]?", b[posi[aux]].nome);
+                  printf("\n[S/N] >> Opção: ");
+                  scanf("%s", &sim_ou_nao);
+                  __fpurge(stdin);
+                  if (sim_ou_nao == 's' || sim_ou_nao == 'S') {
+                    b[posi[aux]].def = 0;
+                    b[posi[aux]].resi = 0;
+                    b[posi[aux]].redu = 0;
+                    printf("\n[*PERSONAGEM EXCLUIDO COM SUCESSO!*]\n");
+                    cont_b--;
+                  }
+                    else {
+                      if (sim_ou_nao == 'n' || sim_ou_nao == 'N') {
+                        printf("\n[*EXCLUSÃO CANCELADA!*]\n");
+                      }
+                        else {
+                          loop = 1;
+                          printf("\n>> Opção inválida! Tente novamente...");
+                        }
+                    }
+                } while (loop);   
+              aux--;
+            }
+            if (loop_ext_aux == 1) {
+              printf("\nAperte ENTER para continuar...");
+              getchar();
+              __fpurge(stdin);
+            }
+          } while (loop_ext_aux);
+        }
+          else 
+            printf("\n[*NÃO HÁ BOTS CADASTRADOS!* \nPRIMEIRO CADASTRE UM BOT...]\n");
+      break;
+
+
+      case 9: 
+        if (cont_p > 0 && cont_b > 0) {
+          do {
+            loop_ext_aux = 1;
+            do {
+              __fpurge(stdin);
+              system("clear");
+              aux = 0;
+              loop = 1;
+              printf("\n------< MENU DE BUSCA DE PERSONAGEM >------\n");
+              printf("\n>> Para buscar o personagem você pode usar: ");
+              printf("\n[Nome]");
+              printf("\n[PARA VOLTAR AO MENU DIGITE VOLTAR[0]]");
+              printf("\n\n-----------------------------------------\n");
+              printf("\n>> Busca: ");
+              fgets(validacao, TAM_STRING, stdin);
+              __fpurge(stdin);
+              validacao[strlen(validacao)-1] = L'\0';
+
+                for (i = 0; i < MAX_PERS; i++) {
+                  if (strcasestr(validacao, p[i].nome) != NULL) {
+                    aux++;
+                    posi[aux] = i;
+                    loop = 0;
+                    }
+                  }
+
+                if (loop == 1 && strcasestr(validacao, "volta") != NULL || strcasestr(validacao, "0") != NULL) {
+                  loop = 0;
+                  loop_ext_aux = 0;
+                }
+                  if (loop == 1) {
+                    printf("\n>> Opção Inválida! Tente novamente...\n");
+                    printf("\nAperte ENTER para continuar...");
+                    getchar();
+                    __fpurge(stdin);
+                  }
+            } while (loop);
+
+            while (aux != 0) {
+              printf("\n---------------------------------------------------");
+              printf("\n*[Personagem encontrado: >> %s <<]*", p[posi[aux]].nome);
+              printf("\n---------------------------------------------------");
+              printf("\n[{STATUS}]");
+              printf("\n---------------------------------------------------");
+              printf("\n[ATK: %d]", p[posi[aux]].ataque);
+              printf("\n[DEF: %d]", p[posi[aux]].defesa);
+              printf("\n[HP: %d]", p[posi[aux]].vida);
+              printf("\n[VEL: %d]", p[posi[aux]].velocidade);
+              printf("\n[CRIT: %d]", p[posi[aux]].critico);
+              printf("\n[DANO CRIT: %d]", p[posi[aux]].dano_critico);
+              printf("\n[EFIC: %d]", p[posi[aux]].eficacia);
+              printf("\n[RESIST: %d]", p[posi[aux]].resistencia);
+              printf("\n===================================================");
+                for (i = 0; i < MAX_HAB; i++) {
+                  printf("\nHABILIDADE [%d]: ", i+1);
+                  printf("[%s]", p[posi[aux]].h[i].nome);
+                  printf("\n---------------------------------------------------");
+                  printf("\nREFORÇOS:");
+                  for (j = 0; j < MAX_BUFF; j++) {
+                    if (p[posi[aux]].h[i].b[0].buff_vet[j] == 1) {
+                      printf("\n[%s]", buffs[j]);
+                    }
+                  }
+                  printf("\n---------------------------------------------------");
+                  printf("\nPENALIDADES:");
+                  for (j = 0; j < MAX_DEBUFF; j++) {
+                    if (p[posi[aux]].h[i].b[0].debuff_vet[j] == 1) {
+                      printf("\n[%s]", debuffs[j]);
+                    }
+                  }
+                  printf("\n---------------------------------------------------");
+                  printf("\nMODIFICADORES:");
+                  for (j = 0; j < MAX_BUFF; j++) {
+                    if (p[posi[aux]].h[i].mod[j] == 1) {
+                      printf("\n[%s]", habilidade_mod[j]);
+                    }
+                  }
+                  printf("\n===================================================");
+                }
+              aux--;
+            }
+            if (loop_ext_aux == 1) {
+              printf("\nAperte ENTER para continuar...");
+              getchar();
+              __fpurge(stdin);
+            }
+
+            if (loop_ext_aux != 0) {
+              do {
+                loop_ext = 1;
+                do {
+                  __fpurge(stdin);
+                  system("clear");
+                  aux_ext = 0;
+                  loop = 1;
+                  printf("\n------------< MENU DE PROCURA DE BOT >------------\n");
+                  printf("\n>> Para buscar o bot você pode usar: ");
+                  printf("\n[Nome do Bot]");
+                  printf("\n[PARA MOSTRAR TODOS OS BOTS DIGITE TUDO[1]] ");
+                  printf("\n[PARA VOLTAR AO MENU DIGITE VOLTAR[0]]");
+                  printf("\n\n-----------------------------------------\n");
+                  printf("\n>> Busca: ");
+                  fgets(validacao, TAM_STRING, stdin);
+                  __fpurge(stdin);
+                  validacao[strlen(validacao)-1] = L'\0';
+  
+                    for (i = 0; i < cont_b; i++) {
+                      if (strcasestr(validacao, b[i].nome) != NULL) {
+                        aux_ext++;
+                        posi_ext[aux_ext] = i;
+                        loop = 0;
+                        }
+                      }
+  
+                    if (loop == 1 && strcasestr(validacao, "volta") != NULL || strcasestr(validacao, "0") != NULL) {
+                      loop = 0;
+                      loop_ext = 0;
+                    }
+                      else if (strcasestr(validacao, "tudo") != NULL || strcasestr(validacao, "1") != NULL) {
+                          for (i = 0; i < cont_b; i++) {
+                            aux_ext++;
+                            posi_ext[aux_ext] = i;
+                          }
+                          loop = 0;
+                        }
+                          if (loop == 1) {
+                            printf("\n>> Opção Inválida! Tente novamente...\n");
+                            printf("\nAperte ENTER para continuar...");
+                            getchar();
+                            __fpurge(stdin);
+                          }
+                } while (loop);
+  
+                    while (aux_ext != 0) {
+                      printf("\n---------------------------------------------------");
+                      printf("\n*[Bot encontrado: >> %s <<]*", b[posi_ext[aux_ext]].nome);
+                      printf("\n---------------------------------------------------");
+                      printf("\n[{STATUS}]");
+                      printf("\n---------------------------------------------------");
+                      printf("\nDEFESA: %d", b[posi_ext[aux_ext]].def);
+                      printf("\nRESISTÊNCIA: %d", b[posi_ext[aux_ext]].resi);
+                      printf("\nREDUÇÃO DE DANO: %d", b[posi_ext[aux_ext]].redu);
+                      printf("\n---------------------------------------------------");
+                      aux_ext--;
+                    }
+                    if (loop_ext == 1) {
+                      printf("\nAperte ENTER para continuar...");
+                      getchar();
+                      __fpurge(stdin);
+                    }
+              } while (loop_ext);
+            }
+
+            if (loop_ext_aux == 1) {
+              printf("\nINICIANDO SIMULAÇÃO. Aperte ENTER para continuar...");
+              getchar();
+              __fpurge(stdin);
+              system("clear");
+              printf("\n---------------------------------------------------\n");
+              printf("*[Simulação de batalha com o bot %s]*", b[posi_ext[aux_ext]].nome);
+              printf("\n---------------------------------------------------\n");
+              printf("*[Personagem escolhido %s]*", p[posi[aux]].nome);
+              printf("\n---------------------------------------------------");
+                do {
+                  loop_ext = 1;
+                  do {
+                    loop = 1;
+                    printf("\n>> Qual habilidade você deseja usar?");
+                    printf("\n---------------------------------------------------");
+                      for (i = 0; i < MAX_HAB; i++) {
+                        printf("\nHABILIDADE [%d]: ", i+1);
+                        printf("[%s]", p[posi[aux]].h[i].nome);
+                        printf("\n---------------------------------------------------");
+                        
+                        printf("\nREFORÇOS:");
+                        for (j = 0; j < MAX_BUFF; j++) {
+                          if (p[posi[aux]].h[i].b[0].buff_vet[j] == 1) {
+                            printf("\n[%s]", buffs[j]);
+                          }
+                        }
+                        printf("\n---------------------------------------------------");
+                          
+                        printf("\nPENALIDADES:");
+                        for (j = 0; j < MAX_DEBUFF; j++) {
+                          if (p[posi[aux]].h[i].b[0].debuff_vet[j] == 1) {
+                            printf("\n[%s]", debuffs[j]);
+                          }
+                        }
+                        printf("\n---------------------------------------------------");
+                          
+                        printf("\nMODIFICADORES:");
+                        for (j = 0; j < MAX_BUFF; j++) {
+                          if (p[posi[aux]].h[i].mod[j] == 1) {
+                            printf("\n[%s]", habilidade_mod[j]);
+                          }
+                        }
+                      }
+                    printf("\n---------------------------------------------------\n");
+                    printf("[PARA SAIR DA BATALHA DIGITE SAIR[0]")
+                    printf("\n---------------------------------------------------");
+                    printf("\n>> Opção: ");
+                    fgets(validacao, TAM_STRING, stdin);
+                    __fpurge(stdin);
+                    validacao[strlen(validacao)-1] = L'\0';
+                      for (i = 0; i < MAX_HAB; i++) {
+                        sprintf(validacao_aux, "%d", i+1);
+                        if (strstr(validacao, validacao_aux) != NULL || strcasestr(validacao, p[posi[aux]].h[i].nome)) {
+                          hab_escolhida = i;
+                          loop = 0;
+                        }
+                      }
+                    if (loop == 1 && strcasestr(validacao, "sair") == NULL || strcasestr(validacao, "0")) {
+                      loop = 0;
+                      loop_ext = 0;
+                      printf("\nVoltando ao menu...\n");
+                    }
+                      else
+                        printf("\nOpção inválida! Tente novamente...");
+                  } while (loop);
+          
+                  // BUFFS:
+                  for (j = 0; j < MAX_BUFF; j++) {
+                      if (p[posi[aux]].h[hab_escolhida].b[0].buff_vet[j] == 1) {
+                        buf_btl[j] = buf_utl[j];
+                        cdwn_b_btl[j] = p[posi[aux]].h[hab_escolhida].b[0].c_b[0].cooldown_b[j];
+                      }
+                    }
+
+                  // DEBUFFS:
+                  for (j = 0; j < MAX_DEBUFF; j++) {
+                    if (p[posi[aux]].h[hab_escolhida].b[0].debuff_vet[j] == 1) {
+                      deb_btl[j] = deb_utl[j];
+                      cdwn_d_btl[j] = p[posi[aux]].h[hab_escolhida].b[0].c_b[0].cooldown_d[j];
+                    }
+                  }
+
+                  // MODIFICADORES: 
+                  printf("\nMODIFICADORES:");
+                  for (j = 0; j < MAX_BUFF; j++) {
+                    if (p[posi[aux]].h[hab_escolhida].mod[j] == 1) {
+                      hab_btl[j] = hab_utl[j];
+                      cdwn_h_btl[j] = p[posi[aux]].h[hab_escolhida].c_h[0].cooldown_h[j];
+                    }
+                  }
+                  printf("\n---------------------------------------------------");
+                  printf("\n[BUFFS de: [%s]]", p[posi[aux]].nome);
+                  for (i = 0; i < MAX_BUFF; i++) {
+                     if (cdwn_b_btl[i] != 0) {
+                       printf("\n[%s]", buffs[j]);
+                     }
+                  }
+                  printf("\n---------------------------------------------------");
+                  printf("\n[DEBUFFS de: [%s]]", b[posi_ext[aux_ext]].nome);
+                   for (i = 0; i < MAX_DEBUFF; i++) {
+                      if (cdwn_d_btl[i] != 0) {
+                        printf("\n[%s]", debuffs[j]);
+                      }
+                   }
+                  printf("\n---------------------------------------------------\n");
+
+                  // CÁLCULO DE ATRIBUTOS:
+                  ATK_btl = p[posi[aux]].ataque;
+                  DEF_btl = p[posi[aux]].defesa;
+                  CRIT_btl = p[posi[aux]].critico;
+                  EFIC_btl = p[posi[aux]].efic;
+                  RESIST_btl = p[posi[aux]].resist;
+                  ESQV_btl = p[posi[aux]].esquiva;
+                  VEL_btl = p[posi[aux]].velocidade;
+                  for (j = 0; j < MAX_BUFF; j++) {
+                    if (cdwn_b_btl[j] != 0) {
+                      if (j == 0 || j == 1 || j == 18 || j == 19 ) {
+                        ATK_btl == (hab_btl[j]*ATK_btl) + ATK_btl;
+                      }
+                      if (j == 2 || j == 18) {
+                        DEF_btl = (hab_btl[j]*DEF_btl) + DEF_btl;
+                      }
+                      if (j == 4 || j == 20) {
+                        CRIT_btl = (hab_btl[j]*100) + CRIT_btl;
+                      }
+                      if (j == 6) {
+                        EFIC_btl = (hab_btl[j]*100) + EFIC_btl;
+                      }
+                      if (j == 7) {
+                        RESIST_btl = (hab_btl[j]*100) + RESIST_btl;          
+                      }
+                      if (j == 8) {
+                        ESQV_btl = (hab_btl[j]*100) + ESQV_btl;
+                      }
+                      if (j == 3 || j == 19) {
+                        VEL_btl = (hab_btl[j]*VEL_btl) + VEL_btl;
+                      }
+                    }
+                  }
+
+                  
+                  // CÁLCULO DE DANO:
+                  srand(time(NULL));
+                  int chance = rand() % 100;
+                    if (chance < ) {
+                      dano_btl = (ATK_btl * DANO_CRIT_btl - DEF_btl)*((100-b[posi_ext[aux_ext]].redu)/100);
+                    } 
+                      else {
+                        dano_btl = (ATK_btl - DEF_btl)*((100-b[posi_ext[aux_ext]].redu)/100);
+                      }
+      
+                  
+                  //////
+                } while (loop_ext);
+              
+            }
+
+
+
+            
+            
+          } while (loop_ext_aux);
+        }
+          else {
+            if (cont_p == 0)
+              printf("\n[*NÃO HÁ PERSONAGENS CADASTRADOS!*] \nPRIMEIRO CADASTRE UM PERSONAGEM...\n");
+            if (cont_b == 0)
+              printf("\n[*NÃO HÁ BOTS CADASTRADOS!*] \nPRIMEIRO CRIE UM BOT...\n");
+          }
+      break;
+
+
+      case 11: 
+        printf("\n----------------------------------------\n");
+        printf("*Bem vindo ao menu |secreto| de desenvolvedor!*");
+        printf("\nAqui você pode alterar [parâmetros] do [código]...");
+        printf("\n----------------------------------------\n");
+        do {
+          loop_ext = 1;
+          do {
+            loop = 1;
+            printf("\n------------ MENU DE OPÇÕES ------------\n");
+            printf("\nEscolha o que você deseja alterar:");
+            printf("\n[1] - ALTERAR QNTD DE [PONTOS DE STATUS]");
+            printf("\n[2] - ALTERAR QNTD DE [PONTOS DE HABILIDADE]");
+            printf("\n[3] - ALTERAR MULTIPLICADO0 DE GASTO DE [ATK]");
+            printf("\n[4] - ALTERAR MULTIPLICADOR DE GASTO DE [DEFESA]");
+            printf("\n[5] - ALTERAR MULTIPLICADOR DE GASTO DE [VIDA]");
+            printf("\n[6] - ALTERAR MULTIPLICADOR DE GASTO DE [VELOCIDADE]");
+            printf("\n[7] - ALTERAR MULTIPLICADOR DE GASTO DE [CRÍTICO]");
+            printf("\n[8] - ALTERAR MULTIPLICADOR DE GASTO DE [DANO CRÍTICO]");
+            printf("\n[9] - ALTERAR MULTIPLICADOR DE GASTO DE [EFICÁCIA]");
+            printf("\n[10] - ALTERAR MULTIPLICADOR DE GASTO DE [RESISTÊNCIA]");
+            printf("\n[11] - ALTERAR LIMITE DE [ATK]");
+            printf("\n[12] - ALTERAR LIMITE DE [DEFESA]");
+            printf("\n[13] - ALTERAR LIMITE DE [VIDA]");
+            printf("\n[14] - ALTERAR LIMITE DE [VELOCIDADE]");
+            printf("\n[15] - ALTERAR LIMITE DE [CRÍTICO]");
+            printf("\n[16] - ALTERAR LIMITE DE [DANO CRÍTICO]");
+            printf("\n[17] - ALTERAR LIMITE DE [EFICÁCIA]");
+            printf("\n[18] - ALTERAR LIMITE DE [RESISTÊNCIA]");
+            printf("\n[19] - MOSTRAR TUDO");
+            printf("\n\n----------------------------------------\n");
+            printf("[0] - SAIR");
+            printf("\n----------------------------------------\n");
+            printf("\n>> Opção: ");
+            fgets(validacao, TAM_STRING, stdin);
+            __fpurge(stdin);
+            validacao[strlen(validacao)-1] = L'\0';
+            if (verificaNumero(validacao) > 0 && verificaNumero(validacao) <= 19) {
+              loop = 0;
+              escolha_menu = atoi(validacao);
+            }
+              else if (verificaNumero(validacao) == 0 || strcasestr(validacao, "sair") != NULL) {
+                printf("\n>> TEM CERTEZA QUE DESEJA SAIR? [S/N]: ");
+                scanf("%c", &sim_ou_nao);
+                __fpurge(stdin);
+                if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+                  printf("\nSaindo...");
+                  loop = 0;
+                  loop_ext = 0;
+                }
+              }
+            if (loop == 1)
+              printf("\nOpção inválida! Tente novamente...\n");
+          } while (loop == 1);
+          switch (escolha_menu) {
+            case 1:
+              do {
+                loop = 1;
+                printf("\nAtual: [%d]", pst_qtd);
+                printf("\n>> Digite a nova quantidade de [Pontos de Status]: ");
+                fgets(validacao, TAM_STRING, stdin);
+                __fpurge(stdin);
+                validacao[strlen(validacao)-1] = L'\0';
+                  if (verificaNumero(validacao) > 0) {   
+                    pst_qtd = atoi(validacao);
+                    loop = 0;
+                  }
+              } while (loop);
+            break;
+            case 2:
+              do {
+                loop = 1;
+                printf("\nAtual: [%d]", phb_qtd);
+                printf("\n>> Digite a nova quantidade de [Pontos de Habilidade]: ");
+                fgets(validacao, TAM_STRING, stdin);
+                __fpurge(stdin);
+                validacao[strlen(validacao)-1] = L'\0';
+                  if (verificaNumero(validacao) > 0) {   
+                    phb_qtd = atoi(validacao);
+                    loop = 0;
+                  }
+              } while (loop);
+            break;
+            case 3:
+              do {
+                loop = 1;
+                printf("\nAtual: [%d]", atk);
+                printf("\n>> Digite o novo multiplicador gasto de [ATK]: ");
+                fgets(validacao, TAM_STRING, stdin);
+                __fpurge(stdin);
+                validacao[strlen(validacao)-1] = L'\0';
+                  if (verificaNumero(validacao) > 0) {   
+                    atk = atoi(validacao);
+                    loop = 0;
+                  }
+              } while (loop);
+            break;
+            case 4:
+              do {
+                loop = 1;
+                printf("\nAtual: [%d]", atk);
+                printf("\n>> Digite o novo multiplicador de gasto de [DEFESA]: ");
+                fgets(validacao, TAM_STRING, stdin);
+                __fpurge(stdin);
+                validacao[strlen(validacao)-1] = L'\0';
+                  if (verificaNumero(validacao) > 0) {   
+                    def = atoi(validacao);
+                    loop = 0;
+                  }
+              } while (loop);
+            break;
+            case 5:
+              do {
+                loop = 1;
+                printf("\nAtual: [%d]", vida);
+                printf("\n>> Digite o novo multiplicador de gasto de [VIDA]: ");
+                fgets(validacao, TAM_STRING, stdin);
+                __fpurge(stdin);
+                validacao[strlen(validacao)-1] = L'\0';
+                  if (verificaNumero(validacao) > 0) {   
+                    vida = atoi(validacao);
+                    loop = 0;
+                  }
+              } while (loop);
+            break;
+            case 6:
+              do {
+                loop = 1;
+                printf("\nAtual: [%d]", vel);
+                printf("\n>> Digite o novo multiplicador de gasto de [VELOCIDADE]: ");
+                fgets(validacao, TAM_STRING, stdin);
+                __fpurge(stdin);
+                validacao[strlen(validacao)-1] = L'\0';
+                  if (verificaNumero(validacao) > 0) {   
+                    vel = atoi(validacao);
+                    loop = 0;
+                  }
+              } while (loop);
+            break;
+            case 7:
+              do {
+                loop = 1;
+                printf("\nAtual: [%d]", vel);
+                printf("\n>> Digite o novo multiplicador de gasto de [CRÍTICO]: ");
+                fgets(validacao, TAM_STRING, stdin);
+                __fpurge(stdin);
+                validacao[strlen(validacao)-1] = L'\0';
+                  if (verificaNumero(validacao) > 0) {   
+                    cri = atoi(validacao);
+                    loop = 0;
+                  }
+              } while (loop);
+            break;
+            case 8:
+              do {
+                  loop = 1;
+                  printf("\nAtual: [%d]", vel);
+                  printf("\n>> Digite o novo multiplicador de gasto de [DANO CRÍTICO]: ");
+                  fgets(validacao, TAM_STRING, stdin);
+                  __fpurge(stdin);
+                  validacao[strlen(validacao)-1] = L'\0';
+                    if (verificaNumero(validacao) > 0) {   
+                      dano = atoi(validacao);
+                      loop = 0;
+                    }
+                } while (loop);
+            break;
+            case 9:
+              do {
+                  loop = 1;
+                  printf("\nAtual: [%d]", vel);
+                  printf("\n>> Digite o novo multiplicador de gasto de [EFICÁCIA]: ");
+                  fgets(validacao, TAM_STRING, stdin);
+                  __fpurge(stdin);
+                  validacao[strlen(validacao)-1] = L'\0';
+                    if (verificaNumero(validacao) > 0) {   
+                      efic = atoi(validacao);
+                      loop = 0;
+                    }
+                } while (loop);
+            break;
+            case 10:
+              do {
+                  loop = 1;
+                  printf("\nAtual: [%d]", vel);
+                  printf("\n>> Digite o novo multiplicador de gasto de [RESISTÊNCIA]: ");
+                  fgets(validacao, TAM_STRING, stdin);
+                  __fpurge(stdin);
+                  validacao[strlen(validacao)-1] = L'\0';
+                    if (verificaNumero(validacao) > 0) {   
+                      resi = atoi(validacao);
+                      loop = 0;
+                    }
+                } while (loop);
+            break;
+            case 11:
+              do {
+                  loop = 1;
+                  printf("\nAtual: [%d]", vel);
+                  printf("\n>> Digite o novo limite máximo de gasto de [ATK]: ");
+                  fgets(validacao, TAM_STRING, stdin);
+                  __fpurge(stdin);
+                  validacao[strlen(validacao)-1] = L'\0';
+                    if (verificaNumero(validacao) > 0) {   
+                      max_atk = atoi(validacao);
+                      loop = 0;
+                    }
+                } while (loop);
+            break;
+            case 12:
+              do {
+                  loop = 1;
+                  printf("\nAtual: [%d]", vel);
+                  printf("\n>> Digite o novo limite máximo de gasto de [DEFESA]: ");
+                  fgets(validacao, TAM_STRING, stdin);
+                  __fpurge(stdin);
+                  validacao[strlen(validacao)-1] = L'\0';
+                    if (verificaNumero(validacao) > 0) {   
+                      max_def = atoi(validacao);
+                      loop = 0;
+                    }
+                } while (loop);
+            break;
+            case 13:
+              do {
+                  loop = 1;
+                  printf("\nAtual: [%d]", vel);
+                  printf("\n>> Digite o novo limite máximo de gasto de [VIDA]: ");
+                  fgets(validacao, TAM_STRING, stdin);
+                  __fpurge(stdin);
+                  validacao[strlen(validacao)-1] = L'\0';
+                    if (verificaNumero(validacao) > 0) {   
+                      max_vida = atoi(validacao);
+                      loop = 0;
+                    }
+                } while (loop);
+            break;
+            case 14:
+              do {
+                  loop = 1;
+                  printf("\nAtual: [%d]", vel);
+                  printf("\n>> Digite o novo limite máximo de gasto de [VELOCIDADE]: ");
+                  fgets(validacao, TAM_STRING, stdin);
+                  __fpurge(stdin);
+                  validacao[strlen(validacao)-1] = L'\0';
+                    if (verificaNumero(validacao) > 0) {   
+                      max_vel = atoi(validacao);
+                      loop = 0;
+                    }
+                } while (loop);
+              break;
+              case 15:
+                do {
+                    loop = 1;
+                    printf("\nAtual: [%d]", vel);
+                    printf("\n>> Digite o novo limite máximo de gasto de [CRÍTICO]: ");
+                    fgets(validacao, TAM_STRING, stdin);
+                    __fpurge(stdin);
+                    validacao[strlen(validacao)-1] = L'\0';
+                      if (verificaNumero(validacao) > 0) {   
+                        max_cri = atoi(validacao);
+                        loop = 0;
+                      }
+                  } while (loop);
+              break;
+              case 16:
+                do {
+                    loop = 1;
+                    printf("\nAtual: [%d]", vel);
+                    printf("\n>> Digite o novo limite máximo de gasto de [DANO CRÍTICO]: ");
+                    fgets(validacao, TAM_STRING, stdin);
+                    __fpurge(stdin);
+                    validacao[strlen(validacao)-1] = L'\0';
+                      if (verificaNumero(validacao) > 0) {   
+                        max_dano = atoi(validacao);
+                        loop = 0;
+                      }
+                  } while (loop);
+              break;
+              case 17:
+                do {
+                    loop = 1;
+                    printf("\nAtual: [%d]", vel);
+                    printf("\n>> Digite o novo limite máximo de gasto de [EFICÁCIA]]: ");
+                    fgets(validacao, TAM_STRING, stdin);
+                    __fpurge(stdin);
+                    validacao[strlen(validacao)-1] = L'\0';
+                      if (verificaNumero(validacao) > 0) {   
+                        max_efic = atoi(validacao);
+                        loop = 0;
+                      }
+                  } while (loop);
+              break;
+              case 18:
+                do {
+                    loop = 1;
+                    printf("\nAtual: [%d]", vel);
+                    printf("\n>> Digite o novo limite máximo de gasto de [RESISTÊNCIA]: ");
+                    fgets(validacao, TAM_STRING, stdin);
+                    __fpurge(stdin);
+                    validacao[strlen(validacao)-1] = L'\0';
+                      if (verificaNumero(validacao) > 0) {   
+                        max_efic = atoi(validacao);
+                        loop = 0;
+                      }
+                  } while (loop);
+              break;
+
+              case 19:
+                printf("\n------------ MENU DE OPÇÕES ------------\n");
+                printf("\n[Pontos de Status: %d]", pst_qtd);
+                printf("\n[Pontos de Habilidade: %d]", phb_qtd);
+                printf("\n[Multiplicador de ATK: %d]", atk);
+                printf("\n[Multiplicador de DEF: %d]", def);
+                printf("\n[Multiplicador de VIDA: %d]", vida);
+                printf("\n[Multiplicador de VEL: %d]", vel);
+                printf("\n[Multiplicador de CRI: %d]", cri);
+                printf("\n[Multiplicador de DAN: %d]", dano);
+                printf("\n[Multiplicador de EFC: %d]", efic);
+                printf("\n[Multiplicador de RES: %d]", resi);
+                printf("\n[Limite de ATK: %d]", max_atk);
+                printf("\n[Limite de DEF: %d]", max_def);
+                printf("\n[Limite de VIDA: %d]", max_vida);
+                printf("\n[Limite de VEL: %d]", max_vel);
+                printf("\n[Limite de CRI: %d]", max_cri);
+                printf("\n[Limite de DAN: %d]", max_dano);
+                printf("\n[Limite de EFC: %d]", max_efic);
+                printf("\n[Limite de RES: %d]", max_resi);
+                printf("\n----------------------------------------\n");
+                printf("\nAperte ENTER para continuar...");
+                getchar();
+                __fpurge(stdin);
+              break;
+          }
+        } while (loop_ext);
+      break;
+      case 0:
+        printf("\nTEM CERTEZA QUE DESEJA SAIR? [S/N]");
+        printf("\n>> Opção: ");
+        scanf("%c", &sim_ou_nao);
+        __fpurge(stdin);
+        if (sim_ou_nao == 'S' || sim_ou_nao == 's') {
+          printf("\nObrigado por usar o nosso simulador! Até mais herdeiro!\n");
+          loop_menu = 0;
+        }
+      break;
+    }
+  } while (loop_menu);
+  return 0;
+}

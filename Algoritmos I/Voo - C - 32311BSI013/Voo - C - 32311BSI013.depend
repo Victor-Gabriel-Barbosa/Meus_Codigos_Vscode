@@ -1,0 +1,6 @@
+# depslib dependency file v1.0
+1713205059 source:c:\users\usuario\desktop\programas\voo - c - 32311bsi013\main.c
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
+
