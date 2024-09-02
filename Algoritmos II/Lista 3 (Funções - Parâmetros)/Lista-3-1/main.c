@@ -27,7 +27,7 @@ float mediaPond(float n1, float n2, float n3) { // Função que calcula a média
 
 int main(void) {
   float trabLab, avalSem, examFin;
-  printf("Digite a nota do trabalho de laboratório \n[0-10]: ");
+  printf("😀😀Digite a nota do trabalho de laboratório \n[0-10]: ");
   scanf("%f", &trabLab);
   limpa_buffer();
   printf("Digite a nota da avaliação semestral \n[0-10]: ");
