@@ -3,5 +3,6 @@
     "*.c": "c",
     "stdio.h": "c",
     "documentacao.h": "c"
-  }
+  },
+  "cSpell.language": "en,pt-BR"
 }

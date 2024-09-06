@@ -1,5 +1,6 @@
 {
   "recommendations": [
-    "tabnine.tabnine-vscode"
+    "tabnine.tabnine-vscode",
+    "streetsidesoftware.code-spell-checker-portuguese-brazilian"
   ]
 }
