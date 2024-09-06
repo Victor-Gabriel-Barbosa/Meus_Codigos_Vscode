@@ -11,7 +11,7 @@
 
 int main() {
   int anos, meses, dias, idade;
-  printf("Digite a idade da pessoa em anos:\n"); 
+  printf("Digite a idade da pessoa em anos:\n");
   scanf("%d", &anos);
   printf("Digite a idade da pessoa em meses:\n");
   scanf("%d", &meses);
