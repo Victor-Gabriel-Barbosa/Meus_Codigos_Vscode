@@ -31,14 +31,14 @@ Notas:
 #include <math.h>
 
 typedef struct { 
-    int real, imag;
+    float real, imag;
 } complexo; // Define uma estrutura para representar números complexos
 
 void exibe_complexo(complexo c) { // Exibe um número complexo no formato "a + bi" ou "a - bi"
     if (c.imag >= 0) {
-        printf("%d + %di\n", c.real, c.imag);
+        printf("%.2f + %.2fi\n", c.real, c.imag);
     } else {
-        printf("%d - %di\n", c.real, -c.imag);
+        printf("%.2f - %.2fi\n", c.real, -c.imag);
     }
 }
 
@@ -91,10 +91,10 @@ int main() {
     complexo z, w; // Declara as variáveis z e w com o tipo complexo
 
     printf("Digite o primeiro número complexo (real e imaginário): ");
-    scanf("%d %d", &z.real, &z.imag);
+    scanf("%f %f", &z.real, &z.imag);
     limpa_buffer();
     printf("Digite o segundo número complexo (real e imaginário): ");
-    scanf("%d %d", &w.real, &w.imag);
+    scanf("%f %f", &w.real, &w.imag);
     limpa_buffer();
     
     printf("\nNúmeros complexos digitados:\n");
