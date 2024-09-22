@@ -116,7 +116,7 @@ Lista *listaCocktailSort(Lista *Ptl) {
     trocou = 0;
     atual = inicio;
     while (atual != fim) { // Percorre da esquerda para a direita
-      if (atual->dado > atual->prox->dado) { // Troca os valores dos nós se o dado atual for maior que o próximo
+      if (atual->dado > atual->prox->dado) { // Troca os valores dos nós se o dado atual é maior que o próximo
         temp = atual->dado;
         atual->dado = atual->prox->dado;
         atual->prox->dado = temp;
@@ -129,7 +129,7 @@ Lista *listaCocktailSort(Lista *Ptl) {
     trocou = 0;
     atual = fim;
     while (atual != inicio) {  // Percorre da direita para a esquerda
-      if (atual->dado < atual->ant->dado) { // Troca os valores dos nós se o dado atual for menor que o anterior
+      if (atual->ant->dado > atual->dado) { // Troca os valores dos nós se o dado atual é menor que o anterior
         temp = atual->dado;
         atual->dado = atual->ant->dado;
         atual->ant->dado = temp;

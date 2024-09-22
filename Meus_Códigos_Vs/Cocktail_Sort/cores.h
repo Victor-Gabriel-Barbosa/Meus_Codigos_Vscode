@@ -44,6 +44,6 @@
 #define C_FMT_SUCESSO(texto) C_NEGRITO C_VERDE texto C_RESET     // Formatação p/ mensagens de sucesso 
 #define C_FMT_TITULO(texto) C_NEGRITO C_SUBLINHADO texto C_RESET // Formatação p/ títulos
 #define C_FMT_IF(cor_verdade, cor_falso, condicao, texto) \
-  (condicao) ? C_FMT(cor_verdade, texto) : C_FMT(cor_falso, texto) 
+  (condicao) ? C_FMT(cor_verdade, texto) : C_FMT(cor_falso, texto);
 
 #endif
