@@ -116,7 +116,7 @@ Lista *listaCocktailSort(Lista *Ptl) {
     trocou = 0;
     atual = inicio;
     while (atual != fim) { // Percorre da esquerda para a direita
-      if (atual->dado > atual->prox->dado) { // Troca os valores dos nós se o dado atual é maior que o próximo
+      if (atual->dado > atual->prox->dado) {
         temp = atual->dado;
         atual->dado = atual->prox->dado;
         atual->prox->dado = temp;
@@ -124,12 +124,12 @@ Lista *listaCocktailSort(Lista *Ptl) {
       }
       atual = atual->prox;
     }
-    if (!trocou) continue; // A lista já está ordenada se não houve trocas
+    if (!trocou) break; // A lista já está ordenada se não houve trocas
     fim = fim->ant; // Atualiza o ponteiro fim para a próxima iteração
     trocou = 0;
     atual = fim;
     while (atual != inicio) {  // Percorre da direita para a esquerda
-      if (atual->ant->dado > atual->dado) { // Troca os valores dos nós se o dado atual é menor que o anterior
+      if (atual->ant->dado > atual->dado) { 
         temp = atual->dado;
         atual->dado = atual->ant->dado;
         atual->ant->dado = temp;
@@ -148,7 +148,7 @@ Lista *listaMescla(Lista *Ptl1, Lista *Ptl2) {
   No *n2 = Ptl2->inicio;
   Lista *novaLista = listaCria();
   while (n1 != NULL && n2 != NULL) { // Percorre as duas listas
-    if (n1->dado < n2->dado) { // Insere o menor elemento da lista
+    if (n1->dado < n2->dado) { // Insere o menor elemento entre as listas
       listaInsereFim(novaLista, n1->dado);
       n1 = n1->prox;
     } else {

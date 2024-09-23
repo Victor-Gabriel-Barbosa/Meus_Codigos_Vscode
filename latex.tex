@@ -1,0 +1,85 @@
+\documentclass{article}
+\usepackage{amsmath} % Pacote para usar fórmulas matemáticas
+\usepackage{graphicx} % Para incluir gráficos
+
+\title{Resumo Geral de Estatística Descritiva}
+\author{Autor}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introdução}
+A estatística descritiva envolve métodos para organizar, resumir e apresentar dados de maneira informativa. Os dados podem ser apresentados por meio de gráficos, tabelas e medidas numéricas.
+
+\section*{Medidas de Tendência Central}
+
+\subsection*{1. Média}
+A média é o valor médio de um conjunto de dados. Para calcular a média, somam-se todos os valores e divide-se pela quantidade de valores.
+
+\begin{equation}
+\text{Média} = \frac{\sum x_i}{n}
+\end{equation}
+onde \(x_i\) representa cada valor e \(n\) é o número de observações.
+
+\textbf{Exemplo}: Se as alturas de 5 pessoas são 160, 165, 170, 175 e 180 cm, a média é:
+\[
+\frac{160 + 165 + 170 + 175 + 180}{5} = 170 \text{ cm}
+\]
+
+\subsection*{2. Mediana}
+A mediana é o valor central de um conjunto de dados ordenados. Se houver um número ímpar de observações, a mediana é o valor do meio. Se houver um número par, é a média dos dois valores centrais.
+
+\textbf{Exemplo}: Para os dados 150, 160, 170, 180, 190, a mediana é 170. Para os dados 150, 160, 170, 180, a mediana é:
+\[
+\frac{160 + 170}{2} = 165
+\]
+
+\subsection*{3. Moda}
+A moda é o valor que aparece com maior frequência em um conjunto de dados. Um conjunto de dados pode não ter moda, ter uma única moda (unimodal) ou várias modas (bimodal ou multimodal).
+
+\textbf{Exemplo}: No conjunto de dados 1, 2, 2, 3, 4, 4, 4, a moda é 4, pois aparece mais vezes.
+
+\section*{Medidas de Dispersão}
+
+\subsection*{1. Variância}
+A variância mede a dispersão dos dados em relação à média. Para a população, é dada por:
+\begin{equation}
+\sigma^2 = \frac{\sum (x_i - \mu)^2}{N}
+\end{equation}
+onde \(x_i\) são os valores, \(\mu\) é a média populacional e \(N\) é o número de elementos da população.
+
+Para uma amostra, a fórmula é:
+\begin{equation}
+s^2 = \frac{\sum (x_i - \bar{x})^2}{n-1}
+\end{equation}
+onde \(\bar{x}\) é a média amostral e \(n\) é o número de elementos da amostra.
+
+\subsection*{2. Desvio Padrão}
+O desvio padrão é a raiz quadrada da variância e fornece uma medida da dispersão no mesmo nível dos dados.
+
+\begin{equation}
+\sigma = \sqrt{\frac{\sum (x_i - \mu)^2}{N}}
+\end{equation}
+
+\textbf{Exemplo}: Se os valores de uma amostra são 10, 12, 23, 23, 16, a variância e o desvio padrão podem ser calculados para verificar o quão espalhados estão em relação à média.
+
+\subsection*{3. Intervalo (Range)}
+O intervalo é a diferença entre o maior e o menor valor de um conjunto de dados:
+\begin{equation}
+\text{Intervalo} = x_{\text{máx}} - x_{\text{mín}}
+\end{equation}
+
+\section*{Medidas de Posição}
+
+\subsection*{1. Percentis}
+Os percentis dividem os dados em 100 partes iguais. Por exemplo, o 50º percentil corresponde à mediana.
+
+\subsection*{2. Quartis}
+Os quartis dividem os dados em quatro partes iguais. O primeiro quartil (Q1) corresponde ao 25º percentil, o segundo quartil (Q2) é a mediana (50º percentil), e o terceiro quartil (Q3) é o 75º percentil.
+
+\section*{Conclusão}
+Estatísticas descritivas são fundamentais para resumir e interpretar conjuntos de dados. Medidas de tendência central, dispersão e posição fornecem diferentes formas de analisar a distribuição dos dados.
+
+\end{document}
