@@ -105,39 +105,80 @@ int listaImprime(Lista *Ptl) {
   return 1;
 } 
 
+/* Troca dois nós */
+Lista *listaTrocaNos(Lista *Ptl, No *no1, No *no2) {
+  int NaoFuncionaDeJeitoNenhum = 1; // Não deu pra fazer a troca sem ser por valor ): ):
+  if (Ptl == NULL || no1 == NULL || no2 == NULL || no1 == no2) return Ptl; // Verificações básicas
+  if (NaoFuncionaDeJeitoNenhum == 1) {
+    no1->dado = no1->dado + no2->dado;
+    no2->dado = no1->dado - no2->dado;
+    no1->dado = no1->dado - no2->dado;
+    return Ptl;
+  }
+  if (no1->prox == no2) { // Troca os nós adjacentes
+    No *tmp = no2->prox;
+    no2->prox = no1;
+    no1->prox = tmp;
+    if (tmp != NULL) tmp->ant = no1;
+    no2->ant = no1->ant;
+    no1->ant = no2;
+    if (no2->ant != NULL) no2->ant->prox = no2;
+    else Ptl->inicio = no2;
+  } else if (no2->prox == no1) { // no2 está imediatamente antes de no1
+    No *tmp = no1->prox;
+    no1->prox = no2;
+    no2->prox = tmp;
+    if (tmp != NULL) tmp->ant = no2;
+    no1->ant = no2->ant;
+    no2->ant = no1;
+    if (no1->ant != NULL) no1->ant->prox = no1;
+    else Ptl->inicio = no1;
+  } else { // no1 e no2 não são adjacentes
+    No *tmp1 = no1->prox;
+    No *tmp2 = no1->ant;
+    no1->prox = no2->prox;
+    no1->ant = no2->ant;
+    no2->prox = tmp1;
+    no2->ant = tmp2;
+    if (no1->prox != NULL) no1->prox->ant = no1;
+    else Ptl->fim = no1;
+    if (no1->ant != NULL) no1->ant->prox = no1;
+    else Ptl->inicio = no1; 
+    if (no2->prox != NULL) no2->prox->ant = no2;
+    else Ptl->fim = no2;
+    if (no2->ant != NULL) no2->ant->prox = no2;
+    else Ptl->inicio = no2;
+  }
+  return Ptl;
+}
+
 /* Ordena a lista usando o algoritmo Cocktail Sort */
 Lista *listaCocktailSort(Lista *Ptl) {
   if (Ptl == NULL || Ptl->inicio == NULL) return Ptl;
-  int trocou, temp;
+  int trocou;
   No *inicio = Ptl->inicio; 
   No *fim = Ptl->fim;
   No *atual;
-  do { // Repete enquanto houver trocas
+  do {
     trocou = 0;
     atual = inicio;
-    while (atual != fim) { // Percorre da esquerda para a direita
+    while (atual != fim) { // Percorre da esquerda p/ direita
       if (atual->dado > atual->prox->dado) {
-        temp = atual->dado;
-        atual->dado = atual->prox->dado;
-        atual->prox->dado = temp;
+        Ptl = listaTrocaNos(Ptl, atual, atual->prox);
         trocou = 1;
-      }
-      atual = atual->prox;
+      } else atual = atual->prox;
     }
-    if (!trocou) break; // A lista já está ordenada se não houve trocas
-    fim = fim->ant; // Atualiza o ponteiro fim para a próxima iteração
+    if (!trocou) break;
+    fim = fim->ant; // Atualiza o limite final
     trocou = 0;
     atual = fim;
-    while (atual != inicio) {  // Percorre da direita para a esquerda
-      if (atual->ant->dado > atual->dado) { 
-        temp = atual->dado;
-        atual->dado = atual->ant->dado;
-        atual->ant->dado = temp;
+    while (atual != inicio) { // Percorre da direita p/ esquerda
+      if (atual->ant->dado > atual->dado) {
+        Ptl = listaTrocaNos(Ptl, atual->ant, atual);
         trocou = 1;
-      }
-      atual = atual->ant;
+      } else atual = atual->ant; 
     }
-    inicio = inicio->prox; // Atualiza o ponteiro início para a próxima iteração
+    inicio = inicio->prox;  // Atualiza o limite inicial
   } while (trocou);
   return Ptl;
 }

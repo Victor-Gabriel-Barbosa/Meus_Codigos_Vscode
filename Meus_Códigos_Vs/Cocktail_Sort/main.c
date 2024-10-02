@@ -4,7 +4,7 @@
 #include "lladae2_cocktail_sort.h"
 #include "cores.h"
 
-int main() {
+int main() {  
   do {
     limpaTela("Aperte " C_FMT(C_NEGRITO C_AZUL, "[ENTER]") " p/ iniciar...");
     printf(C_FMT(C_NEGRITO C_SUBLINHADO C_AZUL, "\n[INÍCIO]\n"));
